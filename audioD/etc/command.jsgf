@@ -1,0 +1,4 @@
+#JSGF V1.0 ISO8859-1 en;
+
+grammar command;
+public <command> = (/20/feedback /20/off | /1/feedback /1/on | flat | foot down | foot up | full body one | full body two | head down | head up | incline program | incline | leg down | leg up | /20/light off | /1/light on | lights off | lights on | lounge program | lounge | lumbar down | lumbar up | massage down | massage on | massage stop | massage up | toggle light | toggle lights | wave four | wave one | wave three | wave two | zero gravity program | zero gravity | antisnore | stop);
