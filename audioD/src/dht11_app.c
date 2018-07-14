@@ -38,8 +38,8 @@ int get_temp_humi(unsigned int * T, unsigned int * H)
 	return 0;
 }
 
-/*
-int main(int argc, char **argv)
+
+void * dht11_loop()
 {
 	int fd;
 	unsigned int dht11 = 0;
@@ -50,19 +50,20 @@ int main(int argc, char **argv)
 	if (fd < 0)
 	{
 		printf("can't open /dev/dht11\n");
-		return -1;
+		return;
 	}
+	while(1){
+		read(fd, &dht11, sizeof(dht11));
 
-	read(fd, &dht11, sizeof(dht11));
+		temp = dht11>>8;
+		humi = dht11 &0x000000ff;
+		printf("the current temperature is: %d\n",temp);
+		printf("the current humidity is:    %d\n",humi);
 
-	temp = dht11>>8;
-	humi = dht11 &0x000000ff;
-	printf("the current temperature is: %d\n",temp);
-	printf("the current humidity is:    %d\n",humi);
-
-
+		sleep(10);
+	}
 	close(fd);
 	
 	return 0;
 }
-*/
+

@@ -70,6 +70,7 @@
 #include "xfm10213_i2c.h"
 #include "tty_com.h"
 #include "led.h"
+#include "dht11_app.h"
 
 int blink_cnt = 0;
 
@@ -245,8 +246,9 @@ void sigalrm_led(int sig)
 			led_on();
 		}
 		blink_cnt++;
-    		alarm(2);
+    		alarm(1);
 	}else{
+		led_off();
 		blink_cnt = 0;
 	}
     return;
@@ -274,7 +276,9 @@ recognize_from_microphone()
 
     int ttyFd;
     int sendlen;
-    char send_buf[20]="uartx_test\n";  
+    char send_buf[20]="uartx_test\n"; 
+    char rcv_buf[20]={0};
+
     ttyFd = UARTx_Open(ttyFd,"/dev/ttyS0");
 
     if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
@@ -314,31 +318,98 @@ recognize_from_microphone()
 		//add led
 		//blink_cnt = 0;
 		signal(SIGALRM, sigalrm_led);
-   		alarm(2);
+		led_on();
+   		alarm(1);
 
 		//add tty com
 
-		if(!strcmp(hyp, "Head Up"))
+		if(!strcmp(hyp, "head up"))
     		{
-        		printf("5A1010024000\\n size:%d\n",sizeof("5A1010024000\n"));
-        		memcpy(send_buf, "5A1010024000\n", sizeof("5A1010024000\n"));
-    		}else{
-			memcpy(send_buf, "5A1010024002\n", sizeof("5A1010024000\n"));
+        		memcpy(send_buf, "5A1010024000", sizeof("5A1010024000"));
+    		}else if(!strcmp(hyp, "head down")){
+			memcpy(send_buf, "5A1010024001", sizeof("5A1010024001"));
+		}else if(!strcmp(hyp, "foot up")){
+                        memcpy(send_buf, "5A1010024002", sizeof("5A1010024002"));
+                }else if(!strcmp(hyp, "foot down")){
+                        memcpy(send_buf, "5A1010024003", sizeof("5A1010024003"));
+                }else if(!strcmp(hyp, "leg up")){
+                        memcpy(send_buf, "5A1010024004", sizeof("5A1010024004"));
+                }else if(!strcmp(hyp, "leg down")){
+                        memcpy(send_buf, "5A1010024005", sizeof("5A1010024005"));
+                }else if(!strcmp(hyp, "lumbar up")){
+                        memcpy(send_buf, "5A1010024006", sizeof("5A1010024006"));
+                }else if(!strcmp(hyp, "lumbar down")){
+                        memcpy(send_buf, "5A1010024007", sizeof("5A1010024007"));
+                }else if(!strcmp(hyp, "stop")){
+                        memcpy(send_buf, "5A101002300F", sizeof("5A101002300F"));
+                }else if(!strcmp(hyp, "flat")){
+                        memcpy(send_buf, "5A1010023010", sizeof("5A1010023030"));
+                }else if(!strcmp(hyp, "antisnore")){
+                        memcpy(send_buf, "5A1010023016", sizeof("5A1010023016"));
+                }else if(!strcmp(hyp, "lounge")){
+                        memcpy(send_buf, "5A1010023017", sizeof("5A1010023017"));
+                }else if(!strcmp(hyp, "zero gravity")){
+                        memcpy(send_buf, "5A1010023013", sizeof("5A1010023013"));
+                }else if(!strcmp(hyp, "incline")){
+                        memcpy(send_buf, "5A1010023018", sizeof("5A1010023018"));
+                }else if(!strcmp(hyp, "lounge program")){
+                        memcpy(send_buf, "5A1010023027", sizeof("5A1010023027"));
+                }else if(!strcmp(hyp, "zero gravity program")){
+                        memcpy(send_buf, "5A1010023023", sizeof("5A1010023023"));
+                }else if(!strcmp(hyp, "incline program")){
+                        memcpy(send_buf, "5A1010023028", sizeof("5A1010023028"));
+                }else if(!strcmp(hyp, "massage on")){
+                        memcpy(send_buf, "5A1010023051", sizeof("5A1010023051"));
+                }else if(!strcmp(hyp, "wave one")){
+                        memcpy(send_buf, "5A1010023052", sizeof("5A1010023052"));
+                }else if(!strcmp(hyp, "wave two")){
+                        memcpy(send_buf, "5A1010023053", sizeof("5A1010023053"));
+                }else if(!strcmp(hyp, "wave three")){
+                        memcpy(send_buf, "5A1010023054", sizeof("5A1010023054"));
+                }else if(!strcmp(hyp, "wave four")){
+                        memcpy(send_buf, "5A1010023055", sizeof("5A1010023055"));
+                }else if(!strcmp(hyp, "full body one")){
+                        memcpy(send_buf, "5A1010023056", sizeof("5A1010023056"));
+                }else if(!strcmp(hyp, "full body two")){
+                        memcpy(send_buf, "5A1010023057\n", sizeof("5A1010023057"));
+                }else if(!strcmp(hyp, "massage up")){
+                        memcpy(send_buf, "5A1010023060", sizeof("5A1010023060"));
+                }else if(!strcmp(hyp, "massage down")){
+                        memcpy(send_buf, "5A1010023061", sizeof("5A1010023061"));
+                }else if(!strcmp(hyp, "massage stop")){
+                        memcpy(send_buf, "5A1010023006F", sizeof("5A101002306F"));
+                }else if(!strcmp(hyp, "light on")){
+                        memcpy(send_buf, "5A1010023073", sizeof("5A1010023073"));
+                }else if(!strcmp(hyp, "lights on")){
+                        memcpy(send_buf, "5A1010023073", sizeof("5A1010023073"));
+                }else if(!strcmp(hyp, "light off")){
+                        memcpy(send_buf, "5A1010023074", sizeof("5A1010023074"));
+                }else if(!strcmp(hyp, "lights off")){
+                        memcpy(send_buf, "5A1010023074", sizeof("5A1010023074"));
+                }else if(!strcmp(hyp, "toggle lights")){
+                        memcpy(send_buf, "5A1010023070", sizeof("5A1010023070"));
+                }else if(!strcmp(hyp, "toggle light")){
+                        memcpy(send_buf, "5A1010023070", sizeof("5A1010023070"));
+                }else if(!strcmp(hyp, "feedback off")){
+                        memcpy(send_buf, "None", sizeof("None"));
+                }else if(!strcmp(hyp, "feedback on")){
+                        memcpy(send_buf, "None", sizeof("None"));
+                }
+		else{
+			memcpy(send_buf, "None", sizeof("None"));
 		}
 
                 sendlen = UARTx_Send(ttyFd, send_buf, strlen(send_buf));
 		if(sendlen > 0){  
-            		printf("send data : %s successful len=%d \n",send_buf, sendlen);  
+            		printf("\nsend data successful len=%d \n", sendlen);  
 		}else{  
             		printf("send data failed!\n");
 		}
-
 		
-		ad_read(ad, adbuf, 2048);
-		ad_read(ad, adbuf, 2048);
-		ad_read(ad, adbuf, 2048);
+		//read(ttyFd, rcv_buf, 20);
+		//printf("rcv:%s\n",rcv_buf);
+		
                 fflush(stdout);
-		ad_read(ad, adbuf, 2048);
             }
 
             if (ps_start_utt(ps) < 0)
@@ -365,6 +436,7 @@ main(int argc, char *argv[])
     char const *cfg;
     unsigned int temp;
     unsigned int  humi;
+    pthread_t dht11_pid;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 
@@ -387,11 +459,13 @@ main(int argc, char *argv[])
     }
 
     //add blue led 
-    led_init();
+//    led_init();
     //get temperature and huminity
-    dht11_init();
-    get_temp_humi(&temp, &humi);
-    printf("temp:%d, humi:%d\n",temp, humi);
+    //dht11_init();
+    //get_temp_humi(&temp, &humi);
+    //printf("temp:%d, humi:%d\n",temp, humi);
+
+    pthread_create(&dht11_pid, NULL, dht11_loop, NULL);
 
     E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
 
@@ -400,6 +474,8 @@ main(int argc, char *argv[])
     } else if (cmd_ln_boolean_r(config, "-inmic")) {
         recognize_from_microphone();
     }
+
+    pthread_join(dht11_pid, NULL);
 
     ps_free(ps);
     cmd_ln_free_r(config);

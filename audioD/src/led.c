@@ -25,13 +25,17 @@ int led_init()
 
 void led_on()
 {
+	ledFd = open("/dev/gpio_drv" , O_RDWR|O_NONBLOCK);
 	ioctl(ledFd, LED_ON);
+	close(ledFd);
 	return;	
 }
 
 void led_off()
 {
+	 ledFd = open("/dev/gpio_drv" , O_RDWR|O_NONBLOCK);
 	 ioctl(ledFd, LED_OFF);
+	 close(ledFd);
 	 return;
 }
 
