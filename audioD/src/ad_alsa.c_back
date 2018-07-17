@@ -186,6 +186,18 @@ setparams(int32 sps, snd_pcm_t * handle)
     err = snd_pcm_hw_params_get_buffer_time_max(hwparams, &buffer_time, 0);
     printf("buffer time:%d\n",buffer_time);
 
+	snd_pcm_uframes_t *period_size;
+/*
+    err = snd_pcm_hw_params_get_period_size(hwparams, period_size, &dir);
+    if (err < 0) {
+        fprintf(stderr, "Failed to get period time to %u: %s\n",
+                *period_size, snd_strerror(err));
+        return -1;
+    }else{
+		printf("period_size:%d\n", *period_size);
+    }
+*/
+
 //set buffer size
 /*
     snd_pcm_uframes_t  bufferSize = 16000;

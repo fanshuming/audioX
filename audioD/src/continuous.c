@@ -284,7 +284,7 @@ recognize_from_microphone()
     if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
         E_FATAL("Failed to open audio device\n");
 
-	 //xfm_i2c();
+	xfm_i2c();
 
     if (ad_start_rec(ad) < 0)
         E_FATAL("Failed to start recording\n");
@@ -325,71 +325,71 @@ recognize_from_microphone()
 
 		if(!strcmp(hyp, "head up"))
     		{
-        		memcpy(send_buf, "5A1010024000", sizeof("5A1010024000"));
+        		memcpy(send_buf, head_up_buf, sizeof(head_up_buf) / sizeof(char));
     		}else if(!strcmp(hyp, "head down")){
-			memcpy(send_buf, "5A1010024001", sizeof("5A1010024001"));
+        		memcpy(send_buf, head_down_buf, sizeof(head_up_buf) / sizeof(char));
 		}else if(!strcmp(hyp, "foot up")){
-                        memcpy(send_buf, "5A1010024002", sizeof("5A1010024002"));
+        		memcpy(send_buf, foot_up_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "foot down")){
-                        memcpy(send_buf, "5A1010024003", sizeof("5A1010024003"));
+        		memcpy(send_buf, foot_down_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "leg up")){
-                        memcpy(send_buf, "5A1010024004", sizeof("5A1010024004"));
+        		memcpy(send_buf, leg_up_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "leg down")){
-                        memcpy(send_buf, "5A1010024005", sizeof("5A1010024005"));
+        		memcpy(send_buf, leg_down_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lumbar up")){
-                        memcpy(send_buf, "5A1010024006", sizeof("5A1010024006"));
+        		memcpy(send_buf, lumbar_up_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lumbar down")){
-                        memcpy(send_buf, "5A1010024007", sizeof("5A1010024007"));
+        		memcpy(send_buf, lumbar_down_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "stop")){
-                        memcpy(send_buf, "5A101002300F", sizeof("5A101002300F"));
+        		memcpy(send_buf, stop_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "flat")){
-                        memcpy(send_buf, "5A1010023010", sizeof("5A1010023030"));
+        		memcpy(send_buf, flat_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "antisnore")){
-                        memcpy(send_buf, "5A1010023016", sizeof("5A1010023016"));
+        		memcpy(send_buf, antisnore_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lounge")){
-                        memcpy(send_buf, "5A1010023017", sizeof("5A1010023017"));
+        		memcpy(send_buf, lounge_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "zero gravity")){
-                        memcpy(send_buf, "5A1010023013", sizeof("5A1010023013"));
+        		memcpy(send_buf, zero_gravity_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "incline")){
-                        memcpy(send_buf, "5A1010023018", sizeof("5A1010023018"));
+        		memcpy(send_buf, incline_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lounge program")){
-                        memcpy(send_buf, "5A1010023027", sizeof("5A1010023027"));
+        		memcpy(send_buf, lounge_program_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "zero gravity program")){
-                        memcpy(send_buf, "5A1010023023", sizeof("5A1010023023"));
+        		memcpy(send_buf, zero_gravity_program_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "incline program")){
-                        memcpy(send_buf, "5A1010023028", sizeof("5A1010023028"));
+        		memcpy(send_buf, incline_program_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "massage on")){
-                        memcpy(send_buf, "5A1010023051", sizeof("5A1010023051"));
+        		memcpy(send_buf, massage_on_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "wave one")){
-                        memcpy(send_buf, "5A1010023052", sizeof("5A1010023052"));
+        		memcpy(send_buf, wave_one_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "wave two")){
-                        memcpy(send_buf, "5A1010023053", sizeof("5A1010023053"));
+        		memcpy(send_buf, wave_two_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "wave three")){
-                        memcpy(send_buf, "5A1010023054", sizeof("5A1010023054"));
+        		memcpy(send_buf, wave_three_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "wave four")){
-                        memcpy(send_buf, "5A1010023055", sizeof("5A1010023055"));
+        		memcpy(send_buf, wave_four_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "full body one")){
-                        memcpy(send_buf, "5A1010023056", sizeof("5A1010023056"));
+        		memcpy(send_buf, full_body_one_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "full body two")){
-                        memcpy(send_buf, "5A1010023057\n", sizeof("5A1010023057"));
+        		memcpy(send_buf, full_body_two_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "massage up")){
-                        memcpy(send_buf, "5A1010023060", sizeof("5A1010023060"));
+        		memcpy(send_buf, massage_up_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "massage down")){
-                        memcpy(send_buf, "5A1010023061", sizeof("5A1010023061"));
+        		memcpy(send_buf, massage_down_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "massage stop")){
-                        memcpy(send_buf, "5A1010023006F", sizeof("5A101002306F"));
+        		memcpy(send_buf, massage_stop_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "light on")){
-                        memcpy(send_buf, "5A1010023073", sizeof("5A1010023073"));
+        		memcpy(send_buf, light_on_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lights on")){
-                        memcpy(send_buf, "5A1010023073", sizeof("5A1010023073"));
+        		memcpy(send_buf, lights_on_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "light off")){
-                        memcpy(send_buf, "5A1010023074", sizeof("5A1010023074"));
+        		memcpy(send_buf, light_off_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "lights off")){
-                        memcpy(send_buf, "5A1010023074", sizeof("5A1010023074"));
+        		memcpy(send_buf, lights_off_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "toggle lights")){
-                        memcpy(send_buf, "5A1010023070", sizeof("5A1010023070"));
+        		memcpy(send_buf, toggle_lights_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "toggle light")){
-                        memcpy(send_buf, "5A1010023070", sizeof("5A1010023070"));
+        		memcpy(send_buf, toggle_light_buf, sizeof(head_up_buf) / sizeof(char));
                 }else if(!strcmp(hyp, "feedback off")){
                         memcpy(send_buf, "None", sizeof("None"));
                 }else if(!strcmp(hyp, "feedback on")){
@@ -399,10 +399,11 @@ recognize_from_microphone()
 			memcpy(send_buf, "None", sizeof("None"));
 		}
 
-                sendlen = UARTx_Send(ttyFd, send_buf, strlen(send_buf));
+                sendlen = UARTx_Send(ttyFd, send_buf, sizeof(head_up_buf) / sizeof(char));
+                sendlen = UARTx_Send(ttyFd, head_up_buf, sizeof(head_up_buf) / sizeof(char));
 		if(sendlen > 0){  
-            		printf("\nsend data successful len=%d \n", sendlen);  
-		}else{  
+            		printf("\nsend data:%x %x %x %x %x %x successful len=%d \n",send_buf[0],send_buf[1],send_buf[2],send_buf[3],send_buf[4],send_buf[5], sendlen);  
+		}else{ 
             		printf("send data failed!\n");
 		}
 		

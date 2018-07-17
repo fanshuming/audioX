@@ -263,6 +263,9 @@ int UARTx_Open(int fd, const char * ttyX)
     }
     printf("fd->open=%d \n",fd);
 
+    //UARTx_Set(fd,115200,0,8,1,'N');
+    //UARTx_Set(fd,57600,0,8,1,'N');
+
     return (fd);
 }
 

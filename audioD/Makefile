@@ -8,8 +8,8 @@ CURRENT_DIR = $(shell pwd)
 CC = mipsel-openwrt-linux-gcc
 CFLAGS = -I ./include -O3
 #LDFLAGS = -L ./lib -lpocketsphinx -lsphinxad -lsphinxbase -lpthread
-#LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase -lsphinxad -lpthread -L ./lib/alsa_lib -lasound
-LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase  -lpthread -L ./lib/alsa_lib -lasound
+LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase -lsphinxad -lpthread -L ./lib/alsa_lib -lasound
+#LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase  -lpthread -L ./lib/alsa_lib -lasound
 
 INSTALL = install
 STRIP = mipsel-openwrt-linux-uclibc-strip

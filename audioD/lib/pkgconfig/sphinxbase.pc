@@ -1,15 +1,15 @@
-prefix=/home/fanshuming/alexa_c_realize/cmusphinx_mips/sphinx_build
-exec_prefix=/home/fanshuming/alexa_c_realize/cmusphinx_mips/sphinx_build
+prefix=/home/fan/opensource/cmusphinx_mips/cmusphinx_build
+exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
-libs="-lpthread -lm "
+libs="-lasound -lpthread -lm "
 datadir=${prefix}/share/sphinxbase
 
 Name: SphinxBase
 Description: Shared components for Sphinx speech recognition
 Version: 5prealpha
 URL: http://www.cmusphinx.org/
-Libs: -L${libdir} -lsphinxbase -lsphinxad -lpthread -lm 
+Libs: -L${libdir} -lsphinxbase -lsphinxad -lasound -lpthread -lm 
 Libs.private: ${libs}
 Cflags: -I${includedir} -I${includedir}/sphinxbase
 
