@@ -98,13 +98,13 @@ int xfm_i2c(void) {
 	int fd;
 	int ret;
 
-	/*
+	
 	system("echo 1 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	sleep(0.1);
+	sleep(1);
 	system("echo 0 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	sleep(0.1);
+	sleep(1);
 	system("echo 1 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	*/
+	
 
 	fd = open(I2C_DEFDEV_NAME, O_RDWR);
 	if (fd < 0) {

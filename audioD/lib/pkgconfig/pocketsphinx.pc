@@ -1,4 +1,4 @@
-prefix=/home/fan/opensource/cmusphinx_mips/cmusphinx_build
+prefix=/home/fan/opensource/cmusphinx_mips_oss/cmusphinx_build
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

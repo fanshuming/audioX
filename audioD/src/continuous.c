@@ -71,6 +71,7 @@
 #include "tty_com.h"
 #include "led.h"
 #include "dht11_app.h"
+#include "sub_client.h"
 
 int blink_cnt = 0;
 
@@ -279,7 +280,7 @@ recognize_from_microphone()
     char send_buf[20]="uartx_test\n"; 
     char rcv_buf[20]={0};
 
-    ttyFd = UARTx_Open(ttyFd,"/dev/ttyS0");
+    //ttyFd = UARTx_Open(ttyFd,"/dev/ttyS0");
 
     if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
         E_FATAL("Failed to open audio device\n");
@@ -294,13 +295,15 @@ recognize_from_microphone()
     utt_started = FALSE;
     E_INFO("Ready....\n");
 
-    //FILE *captureFp = fopen("/tmp/capture.pcm","wb");
+    FILE *captureFp = fopen("/tmp/capture.pcm","wb");
 
     for (;;) {
 
         if ((k = ad_read(ad, adbuf, 2048)) < 0)
             E_FATAL("Failed to read audio\n");
-       
+
+      	fwrite(adbuf, 1, k, captureFp);
+ 
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
         in_speech = ps_get_in_speech(ps);
         if (in_speech && !utt_started) {
@@ -408,8 +411,7 @@ recognize_from_microphone()
 		}
 		
 		//read(ttyFd, rcv_buf, 20);
-		//printf("rcv:%s\n",rcv_buf);
-		
+		//printf("rcv:%s\n",rcv_buf);		
                 fflush(stdout);
             }
 
@@ -437,7 +439,9 @@ main(int argc, char *argv[])
     char const *cfg;
     unsigned int temp;
     unsigned int  humi;
+
     pthread_t dht11_pid;
+    pthread_t mosq_pid;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 
@@ -467,6 +471,7 @@ main(int argc, char *argv[])
     //printf("temp:%d, humi:%d\n",temp, humi);
 
     pthread_create(&dht11_pid, NULL, dht11_loop, NULL);
+    pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 
     E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
 
@@ -477,6 +482,7 @@ main(int argc, char *argv[])
     }
 
     pthread_join(dht11_pid, NULL);
+    pthread_join(mosq_pid, NULL);
 
     ps_free(ps);
     cmd_ln_free_r(config);
