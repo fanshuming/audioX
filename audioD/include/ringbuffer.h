@@ -23,10 +23,10 @@ void ringbuffer_destroy(struct ringbuffer *ring_buf);
 void ringbuffer_reset(struct ringbuffer *ring_buf);
 
 unsigned int ringbuffer_put(struct ringbuffer *ring_buf, 
- 	const char *buf, unsigned int len);
+ 	 short *buf, unsigned int len);
 
 unsigned int ringbuffer_get(struct ringbuffer *ring_buf,
- 		int16 *buf, unsigned int len);
+ 		short *buf, unsigned int len);
 
 void ringbuffer_print(struct ringbuffer *ring_buf, unsigned int cnt);
 

@@ -226,7 +226,7 @@ setparams(int32 sps, snd_pcm_t * handle)
     snd_pcm_hw_params_get_period_size(hwparams, &frames, NULL);
     printf("-----------------frames:%d\n",frames);
 
-    xfm_i2c();
+    //xfm_i2c();
 
     err = snd_pcm_nonblock(handle, 1);
     if (err < 0) {

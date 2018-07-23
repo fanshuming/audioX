@@ -18,8 +18,9 @@
 #define INPUT_GAIN 85
 #define SPS_EPSILON 200
 
-//int16 data_buf[6400]={0};
-int16 data_buf[6400]={0};
+//int16 data_buf[4096]={0};
+int16 data_buf[2048]={0};
+//char data_buf[4096]={0};
 
 static int setparams(snd_pcm_t * handle)
 {
@@ -66,14 +67,14 @@ static int setparams(snd_pcm_t * handle)
     	err = snd_pcm_hw_params_get_buffer_time_max(hwparams, &buffer_time, 0);
     	printf("buffer time:%d\n",buffer_time);
     
-    	period_time = buffer_time;
+    	period_time = buffer_time / 4;
     	err = snd_pcm_hw_params_set_period_time_near(handle, hwparams,
                                                  &period_time, 0);
     	if (err < 0) {
         	fprintf(stderr, "Failed to set period time to %u: %s\n",period_time, snd_strerror(err));
        		return -1;
    	 }
-    	buffer_time = buffer_time *4;
+    	//buffer_time = buffer_time *4;
     	err = snd_pcm_hw_params_set_buffer_time_near(handle, hwparams,&buffer_time, 0);
     	if (err < 0) {
         	fprintf(stderr, "Failed to set buffer time to %u: %s\n",buffer_time, snd_strerror(err));
@@ -83,8 +84,8 @@ static int setparams(snd_pcm_t * handle)
     	printf("buffer time:%d\n",buffer_time);
 
     	//snd_pcm_uframes_t frames = 80;
-    	//snd_pcm_uframes_t frames = 32;
-    	snd_pcm_uframes_t frames = 320;
+    	snd_pcm_uframes_t frames = 32;
+    	//snd_pcm_uframes_t frames = 320;
     	snd_pcm_hw_params_set_period_size_near(handle, hwparams, &frames, &dir);
 
     	err = snd_pcm_hw_params(handle, hwparams);
@@ -125,12 +126,13 @@ static int setparams(snd_pcm_t * handle)
 void * record_from_dev(void * ringb)
 {
 
-	int16 buf[6400];
+	int16 buf[2048];
+	//int16 buf[4096];
         int32 length;
 	snd_pcm_t * recHandle;
 	int err;
 
-//	FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
+	FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
 
 	struct ringbuffer *ring_buf = (struct ringbuffer *)ringb;
 
@@ -145,7 +147,7 @@ void * record_from_dev(void * ringb)
 
 	for(;;){
 		//length = snd_pcm_readi(recHandle, buf, 2048);
-		length = snd_pcm_readi(recHandle, buf, 4608);
+		length = snd_pcm_readi(recHandle, buf, 2048);
                 //printf("%d data has been read from dev\n",length);
 
     		if (length == -EAGAIN) {
@@ -191,7 +193,7 @@ void * record_from_dev(void * ringb)
                         p+=1;
     	   }
 
-//    	   fwrite(data_buf, 1, j, incaptureFp);
+    	   fwrite(data_buf, 1, j, incaptureFp);
 
            	if (ringbuffer_is_full(ring_buf)) {
                         printf("buffer is full !\n");
@@ -199,7 +201,8 @@ void * record_from_dev(void * ringb)
                         continue;
                 }
 	   //printf("send length :%d data to ring buffer\n",length);
-                ringbuffer_put(ring_buf, data_buf, length);
+                ringbuffer_put(ring_buf, data_buf, 2048);
+		sleep(0.5);
 	}
 }
 

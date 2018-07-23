@@ -84,7 +84,7 @@ void ringbuffer_destroy(struct ringbuffer *ring_buf)
  */
 
 unsigned int ringbuffer_put(struct ringbuffer *ring_buf,   
-		const char *buffer, unsigned int len)   
+		short *buffer, unsigned int len)   
 {   
 	unsigned int l;   
 
@@ -171,7 +171,7 @@ ssize_t ringbuffer_from_dev(int fd, struct ringbuffer *ring_buf, unsigned int le
  *  writer, you don't need extra locking to use these functions.
  */
 unsigned int ringbuffer_get(struct ringbuffer *ring_buf,
-		int16 *buffer, unsigned int len)
+		short *buffer, unsigned int len)
 {
 	unsigned int l;
 

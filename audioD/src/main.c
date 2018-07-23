@@ -54,7 +54,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <signal.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
@@ -68,12 +67,10 @@
 #include "pocketsphinx.h"
 
 #include "xfm10213_i2c.h"
-#include "tty_com.h"
-#include "led.h"
-#include "dht11_app.h"
-#include "sub_client.h"
+#include "ringbuffer.h"
+#include "record.h"
 
-int blink_cnt = 0;
+#define   FIFO_SIZE     4194304
 
 static const arg_t cont_args_def[] = {
     POCKETSPHINX_OPTIONS,
@@ -166,7 +163,7 @@ recognize_from_file()
         E_FATAL_SYSTEM("Failed to open file '%s' for reading",
                        fname);
     }
-   /* 
+/*    
     if (strlen(fname) > 4 && strcmp(fname + strlen(fname) - 4, ".wav") == 0) {
         char waveheader[44];
 	fread(waveheader, 1, 44, rawfd);
@@ -231,30 +228,6 @@ sleep_msec(int32 ms)
 #endif
 }
 
-
-/*
-* led
-*/
-
-void sigalrm_led(int sig)
-{
-    	if(blink_cnt < 4)
-	{
-		if((blink_cnt % 2) == 0)
-		{
-			led_off();
-		}else{
-			led_on();
-		}
-		blink_cnt++;
-    		alarm(1);
-	}else{
-		led_off();
-		blink_cnt = 0;
-	}
-    return;
-}
-
 /*
  * Main utterance processing loop:
  *     for (;;) {
@@ -264,164 +237,87 @@ void sigalrm_led(int sig)
  *     }
  */
 static void
-recognize_from_microphone()
+recognize_from_microphone( struct ringbuffer * ringB)
 {
     ad_rec_t *ad;
+    int16 adbuf1[1024];
+    int16 adbuf2[1024];
     int16 adbuf[2048];
-    //int16 adbuf[6400];
     uint8 utt_started, in_speech;
-    int32 k;
+    uint32 k;
     char const *hyp;
 
-    //for tty com
+    struct ringbuffer *ring_buf = ringB;
 
-    int ttyFd;
-    int sendlen;
-    char send_buf[20]="uartx_test\n"; 
-    char rcv_buf[20]={0};
-
-    //ttyFd = UARTx_Open(ttyFd,"/dev/ttyS0");
-
+/*
     if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
         E_FATAL("Failed to open audio device\n");
 
-	xfm_i2c();
-
     if (ad_start_rec(ad) < 0)
         E_FATAL("Failed to start recording\n");
+*/
 
     if (ps_start_utt(ps) < 0)
         E_FATAL("Failed to start utterance\n");
     utt_started = FALSE;
     E_INFO("Ready....\n");
 
-    FILE *captureFp = fopen("/tmp/capture.pcm","wb");
+// add read data for debug
+    FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
 
     for (;;) {
+        if (ringbuffer_is_empty(ring_buf)) 
+	{
+		  sleep_msec(1000);
+                  printf("buffer is empty !\n");
+		  continue;
+        }
 
-        if ((k = ad_read(ad, adbuf, 2048)) < 0)
-            E_FATAL("Failed to read audio\n");
+        //k = ringbuffer_get(ring_buf, adbuf, 2048);
+       k = ringbuffer_get(ring_buf, adbuf1, 2048);
+       k = ringbuffer_get(ring_buf, adbuf2, 2048);
+	
+	int16 *p1= adbuf1;
+	int16 *p2= adbuf2;
+	int i=0;
+	for(i = 0; i< 1024 ;i++){
+		adbuf[i] = *p1++;
+		adbuf[1024+i] = *p2++;
+	}
+	
+	// add read data for debug
+	fwrite(adbuf, 2, k, outcaptureFp);
 
-      	fwrite(adbuf, 1, k, captureFp);
- 
+        //if ((k = ad_read(ad, adbuf, 2048, captureFp)) < 0)
+        //    E_FATAL("Failed to read audio\n");
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+	//printf("ps_process_raw\n");
         in_speech = ps_get_in_speech(ps);
+	//printf("ps_get_in_speech\n");
         if (in_speech && !utt_started) {
             utt_started = TRUE;
             E_INFO("Listening...\n");
         }
         if (!in_speech && utt_started) {
             // speech -> silence transition, time to start new utterance 
+	    //printf("speech to silence\n");
             ps_end_utt(ps);
+	    //printf("ps_end_utt\n");
             hyp = ps_get_hyp(ps, NULL );
+	    //printf("ps_get_hyp\n");
             if (hyp != NULL) {
-		//char * ts = enc_utf8_to_unicode_one(hyp);
                 printf("%s\n", hyp);
-
-		//add led
-		//blink_cnt = 0;
-		signal(SIGALRM, sigalrm_led);
-		led_on();
-   		alarm(1);
-
-		//add tty com
-
-		if(!strcmp(hyp, "head up"))
-    		{
-        		memcpy(send_buf, head_up_buf, sizeof(head_up_buf) / sizeof(char));
-    		}else if(!strcmp(hyp, "head down")){
-        		memcpy(send_buf, head_down_buf, sizeof(head_up_buf) / sizeof(char));
-		}else if(!strcmp(hyp, "foot up")){
-        		memcpy(send_buf, foot_up_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "foot down")){
-        		memcpy(send_buf, foot_down_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "leg up")){
-        		memcpy(send_buf, leg_up_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "leg down")){
-        		memcpy(send_buf, leg_down_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lumbar up")){
-        		memcpy(send_buf, lumbar_up_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lumbar down")){
-        		memcpy(send_buf, lumbar_down_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "stop")){
-        		memcpy(send_buf, stop_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "flat")){
-        		memcpy(send_buf, flat_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "antisnore")){
-        		memcpy(send_buf, antisnore_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lounge")){
-        		memcpy(send_buf, lounge_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "zero gravity")){
-        		memcpy(send_buf, zero_gravity_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "incline")){
-        		memcpy(send_buf, incline_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lounge program")){
-        		memcpy(send_buf, lounge_program_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "zero gravity program")){
-        		memcpy(send_buf, zero_gravity_program_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "incline program")){
-        		memcpy(send_buf, incline_program_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "massage on")){
-        		memcpy(send_buf, massage_on_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "wave one")){
-        		memcpy(send_buf, wave_one_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "wave two")){
-        		memcpy(send_buf, wave_two_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "wave three")){
-        		memcpy(send_buf, wave_three_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "wave four")){
-        		memcpy(send_buf, wave_four_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "full body one")){
-        		memcpy(send_buf, full_body_one_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "full body two")){
-        		memcpy(send_buf, full_body_two_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "massage up")){
-        		memcpy(send_buf, massage_up_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "massage down")){
-        		memcpy(send_buf, massage_down_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "massage stop")){
-        		memcpy(send_buf, massage_stop_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "light on")){
-        		memcpy(send_buf, light_on_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lights on")){
-        		memcpy(send_buf, lights_on_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "light off")){
-        		memcpy(send_buf, light_off_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "lights off")){
-        		memcpy(send_buf, lights_off_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "toggle lights")){
-        		memcpy(send_buf, toggle_lights_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "toggle light")){
-        		memcpy(send_buf, toggle_light_buf, sizeof(head_up_buf) / sizeof(char));
-                }else if(!strcmp(hyp, "feedback off")){
-                        memcpy(send_buf, "None", sizeof("None"));
-                }else if(!strcmp(hyp, "feedback on")){
-                        memcpy(send_buf, "None", sizeof("None"));
-                }
-		else{
-			memcpy(send_buf, "None", sizeof("None"));
-		}
-
-                sendlen = UARTx_Send(ttyFd, send_buf, sizeof(head_up_buf) / sizeof(char));
-                sendlen = UARTx_Send(ttyFd, head_up_buf, sizeof(head_up_buf) / sizeof(char));
-		if(sendlen > 0){  
-            		printf("\nsend data:%x %x %x %x %x %x successful len=%d \n",send_buf[0],send_buf[1],send_buf[2],send_buf[3],send_buf[4],send_buf[5], sendlen);  
-		}else{ 
-            		printf("send data failed!\n");
-		}
-		
-		//read(ttyFd, rcv_buf, 20);
-		//printf("rcv:%s\n",rcv_buf);		
                 fflush(stdout);
             }
+	    
+	    ringbuffer_reset(ring_buf);
 
             if (ps_start_utt(ps) < 0)
                 E_FATAL("Failed to start utterance\n");
             utt_started = FALSE;
-		//ad_read(ad, adbuf, 4608);
-		ad_read(ad, adbuf, 2048);
             E_INFO("Ready....\n");
         }
+	
         sleep_msec(100);
 
     }
@@ -437,11 +333,9 @@ int
 main(int argc, char *argv[])
 {
     char const *cfg;
-    unsigned int temp;
-    unsigned int  humi;
 
-    pthread_t dht11_pid;
-    pthread_t mosq_pid;
+    struct ringbuffer *ring_buf;
+    pthread_t record_pid;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 
@@ -463,29 +357,25 @@ main(int argc, char *argv[])
         return 1;
     }
 
-    //add blue led 
-//    led_init();
-    //get temperature and huminity
-    //dht11_init();
-    //get_temp_humi(&temp, &humi);
-    //printf("temp:%d, humi:%d\n",temp, humi);
-
-    pthread_create(&dht11_pid, NULL, dht11_loop, NULL);
-    pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 
     E_INFO("%s COMPILED ON: %s, AT: %s\n\n", argv[0], __DATE__, __TIME__);
 
     if (cmd_ln_str_r(config, "-infile") != NULL) {
         recognize_from_file();
     } else if (cmd_ln_boolean_r(config, "-inmic")) {
-        recognize_from_microphone();
+	// record data from dev
+        ring_buf = ringbuffer_create(FIFO_SIZE);
+	pthread_create(&record_pid, NULL, record_from_dev, ring_buf);
+	
+	// recognize
+        recognize_from_microphone(ring_buf);
     }
-
-    pthread_join(dht11_pid, NULL);
-    pthread_join(mosq_pid, NULL);
 
     ps_free(ps);
     cmd_ln_free_r(config);
+
+    pthread_join(record_pid, NULL);
+    ringbuffer_destroy(ring_buf);
 
     return 0;
 }
