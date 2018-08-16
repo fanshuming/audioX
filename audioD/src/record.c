@@ -13,6 +13,8 @@
 #include "xfm10213_i2c.h"
 
 #include "continuous.h"
+#include "sem.h"
+#include "microphone.h"
 
 #define AUDIO_FORMAT SND_PCM_SFMT_S16_LE        /* 16-bit signed, little endian */
 #define INPUT_GAIN 85
@@ -100,6 +102,7 @@ static int setparams(snd_pcm_t * handle)
 	//set i2c to enablle ifly mic
     	xfm_i2c();
 
+	//set_mic_enable(true);
 	err = snd_pcm_prepare(handle);
     	if (err < 0) {
         	fprintf(stderr, "snd_pcm_prepare failed: %s\n", snd_strerror(err));
@@ -127,10 +130,13 @@ void * record_from_dev(void * ringb)
 {
 
 	int16 buf[2048];
+	int16 testbuf[2048];
+
 	//int16 buf[4096];
         int32 length;
 	snd_pcm_t * recHandle;
 	int err;
+	int ret = 0;
 
 	FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
 
@@ -146,6 +152,13 @@ void * record_from_dev(void * ringb)
 	setparams(recHandle);
 
 	for(;;){
+
+		if(!get_mic_status())	
+		{
+			snd_pcm_readi(recHandle, testbuf, 2048);
+			continue;
+		}
+
 		//length = snd_pcm_readi(recHandle, buf, 2048);
 		length = snd_pcm_readi(recHandle, buf, 2048);
                 //printf("%d data has been read from dev\n",length);

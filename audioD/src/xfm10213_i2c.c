@@ -10,6 +10,8 @@
 #include <getopt.h>
 #include <errno.h>
 
+#include "microphone.h"
+
 #include "log.h"
 
 #define xfm10213_ADDR           (0x3E)
@@ -205,6 +207,8 @@ int xfm_i2c(void) {
 	//
 	unsigned int data_mode = 0x0200;      //写入的是0002
 	unsigned int data_mode2 = 0x0400;     //写入的是0004
+//	unsigned int data_chan = 0x0010;		//写入的是1256
+//	unsigned int data_chan = 0x5010;		//写入的是1256
 	unsigned int data_chan = 0x5612;		//写入的是1256
 	unsigned char reg101[2] = {0x01,0x01};
 	unsigned char reg110[2] = {0x01,0x10};
@@ -240,6 +244,7 @@ int xfm_i2c(void) {
 
 	i2c_read_proc(fd, xfm10213_ADDR, reg111, (unsigned char *)&temp, 2);
 	DELAY_MS(200);
+	set_mic_enable(true);
 	LOGD("read 111 data is %04x\n", temp);
 #endif
 

@@ -1,6 +1,7 @@
 #ifndef __TTY_COM_H__
 #define __TTY_COM_H__
 
+/*
 char head_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x00};
 char head_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x01};
 char foot_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x02};
@@ -37,7 +38,11 @@ char toggle_lights_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x70};
 char feedback_off_buf[6]={"None"};
 char feedback_on_buf[6]={"None"};
 
+char send_cmd_to_com[20]={};
 
+*/
+
+extern char send_cmd_to_com[20];
 /*******************************************************************
 * 功能：            设置串口数据位，停止位和效验位
 * 入口参数：        fd         串口文件描述符
@@ -77,4 +82,5 @@ int UARTx_Send(int fd, char *send_buf,int data_len);
 *****************************************************************/
 int UARTx_Open(int fd, const char * ttyX);
 
+void * send_data_to_com_thread(void *);
 #endif

@@ -69,8 +69,18 @@
 #include "xfm10213_i2c.h"
 #include "ringbuffer.h"
 #include "record.h"
+#include "tty_com.h"
+
+#include <signal.h>
+#include "led.h"
+#include "sub_client.h"
+#include "microphone.h"
+#include "sem.h"
 
 #define   FIFO_SIZE     4194304
+
+int blink_cnt = 0;
+
 
 static const arg_t cont_args_def[] = {
     POCKETSPHINX_OPTIONS,
@@ -228,6 +238,25 @@ sleep_msec(int32 ms)
 #endif
 }
 
+void sigalrm_led(int sig)
+{
+        if(blink_cnt < 4)
+        {
+                if((blink_cnt % 2) == 0)
+                {
+                        led_off();
+                }else{
+                        led_on();
+                }
+                blink_cnt++;
+                alarm(1);
+        }else{
+                led_off();
+                blink_cnt = 0;
+        }
+    return;
+}
+
 /*
  * Main utterance processing loop:
  *     for (;;) {
@@ -245,6 +274,8 @@ recognize_from_microphone( struct ringbuffer * ringB)
     int16 adbuf[2048];
     uint8 utt_started, in_speech;
     uint32 k;
+    int ret = 0;
+
     char const *hyp;
 
     struct ringbuffer *ring_buf = ringB;
@@ -266,6 +297,7 @@ recognize_from_microphone( struct ringbuffer * ringB)
     FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
 
     for (;;) {
+
         if (ringbuffer_is_empty(ring_buf)) 
 	{
 		  sleep_msec(1000);
@@ -307,6 +339,18 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	    //printf("ps_get_hyp\n");
             if (hyp != NULL) {
                 printf("%s\n", hyp);
+		//add led
+                //blink_cnt = 0;
+                signal(SIGALRM, sigalrm_led);
+                led_on();
+                alarm(1);
+
+
+		memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
+		memcpy(send_cmd_to_com, hyp, strlen(hyp) / sizeof(char));
+		
+		set_mic_enable(false);
+
                 fflush(stdout);
             }
 	    
@@ -336,8 +380,13 @@ main(int argc, char *argv[])
 
     struct ringbuffer *ring_buf;
     pthread_t record_pid;
+    pthread_t send_data_to_com_thread_pid;
+    pthread_t mosq_pid;
+    pthread_t mic_wakeup_thread_id;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
+
+    sem_init(&sem_mic_wakeup, 0, 0);
 
     /* Handle argument file as -argfile. */
     if (config && (cfg = cmd_ln_str_r(config, "-argfile")) != NULL) {
@@ -366,6 +415,9 @@ main(int argc, char *argv[])
 	// record data from dev
         ring_buf = ringbuffer_create(FIFO_SIZE);
 	pthread_create(&record_pid, NULL, record_from_dev, ring_buf);
+	pthread_create(&send_data_to_com_thread_pid, NULL, send_data_to_com_thread, NULL);
+	pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
+	pthread_create(&mic_wakeup_thread_id, NULL, microphone_wakeup_poll_thread, NULL);
 	
 	// recognize
         recognize_from_microphone(ring_buf);
@@ -375,6 +427,10 @@ main(int argc, char *argv[])
     cmd_ln_free_r(config);
 
     pthread_join(record_pid, NULL);
+    pthread_join(send_data_to_com_thread_pid, NULL);
+    pthread_join(mosq_pid, NULL);
+    pthread_join(mic_wakeup_thread_id, NULL);
+
     ringbuffer_destroy(ring_buf);
 
     return 0;

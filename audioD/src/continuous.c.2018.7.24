@@ -270,8 +270,11 @@ recognize_from_microphone()
 {
     ad_rec_t *ad;
     int16 adbuf[2048];
-    //int16 adbuf[6400];
+    int16 readbuf1[2048];
+    int16 readbuf2[2048];
     uint8 utt_started, in_speech;
+    int32 k1;
+    int32 k2;
     int32 k;
     char const *hyp;
     unsigned long int recSize = 0;
@@ -302,16 +305,27 @@ recognize_from_microphone()
 
     for (;;) {
 
-        if ((k = ad_read(ad, adbuf, 2048)) < 0)
+        if ((k = ad_read(ad, readbuf1, 2048)) < 0)
             E_FATAL("Failed to read audio\n");
 
-      	fwrite(adbuf, 1, k, captureFp);
-	if(recSize < REC_MAX_SIZE)
-		continue;
-        fclose(captureFp);
+
+	int16 *p1 = readbuf1;
+	int i = 0;
+	for(i=0; i<k; i++ ){
+		adbuf[i] = *p1++;
+		p1 += 1;
+	}
+	
+
+
+      	fwrite(adbuf, 2, k, captureFp);
  
+	//continue;
+
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
         in_speech = ps_get_in_speech(ps);
+	printf("read %d\n",k);
+
         if (in_speech && !utt_started) {
             utt_started = TRUE;
             E_INFO("Listening...\n");

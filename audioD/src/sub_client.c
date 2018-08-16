@@ -29,6 +29,7 @@ Contributors:
 
 #include <mosquitto.h>
 #include "client_shared.h"
+#include "tty_com.h"
 
 #define VERSION 1.4
 
@@ -58,6 +59,11 @@ void my_message_callback(struct mosquitto *mosq, void *obj, const struct mosquit
 		if(message->payloadlen){
 			printf("%s ", message->topic);
 			fwrite(message->payload, 1, message->payloadlen, stdout);
+
+			//send message to tty com port
+			memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
+                	memcpy(send_cmd_to_com, message->payload, strlen(message->payload) / sizeof(char));
+	
 			if(cfg->eol){
 				printf("\n");
 			}

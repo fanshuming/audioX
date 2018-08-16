@@ -9,6 +9,46 @@
 #include<errno.h>      /*错误号定义*/  
 #include<string.h> 
 
+#include "tty_com.h"
+
+char head_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x00};
+char head_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x01};
+char foot_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x02};
+char foot_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x03};
+char leg_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x04};
+char leg_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x05};
+char lumbar_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x06};
+char lumbar_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x07};
+char stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x0F};
+char flat_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x10};
+char antisnore_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x16};
+char lounge_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x17};
+char zero_gravity_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x13};
+char incline_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x18};
+char lounge_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x27};
+char zero_gravity_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x23};
+char incline_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x28};
+char massage_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x51};
+char wave_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x52};
+char wave_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x53};
+char wave_three_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x54};
+char wave_four_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x55};
+char full_body_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x56};
+char full_body_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x57};
+char massage_up_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x60};
+char massage_down_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x61};
+char massage_stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x6F};
+char light_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char lights_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char light_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+char lights_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+char toggle_light_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x70};
+char toggle_lights_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x70};
+char feedback_off_buf[6]={"None"};
+char feedback_on_buf[6]={"None"};
+
+char send_cmd_to_com[20]={};
+
 //宏定义  
 #define TRUE   0  
 #define FALSE  -1  
@@ -273,6 +313,131 @@ int UARTx_Open(int fd, const char * ttyX)
 /******************************************************
 * 名称：    main
 *******************************************************************/
+
+void * send_data_to_com_thread(void * data)
+{
+	int fd;                            //文件描述符  
+    	int err;                           //返回调用函数的状态  
+    	int len;
+
+
+    	//fd = UART0_Open(fd,argv[1]); //打开串口，返回文件描述符  
+	//fd = UARTx_Open(fd); //打开串口，返回文件描述符  
+
+	fd = UARTx_Open(fd, "/dev/ttyS0");
+
+    	if(FALSE == fd){
+        	exit(1);
+	}
+
+	/*
+	配置串口参????    err = UARTx_Set(fd,57600,0,8,1,'N');  
+    	if (FALSE == err){
+        	printf("Set Port Error\n");
+        	exit(1);
+    	}
+	*/
+
+
+	while(1){
+		sleep(1);
+		//printf("send data:%s\n",send_cmd_to_com);
+		if(!strcmp(send_cmd_to_com, "head up")){
+			len = UARTx_Send(fd, head_up_buf, strlen(send_cmd_to_com));
+			if(len > 0){
+				printf(" %x %x %x %x %x %x send data successful len=%d \n",head_up_buf[0],head_up_buf[1],head_up_buf[2],head_up_buf[3],head_up_buf[4],head_up_buf[5],len);
+			}else{
+				printf("send data failed!\n");
+			}
+		}else if(!strcmp(send_cmd_to_com, "lights on")){
+			len = UARTx_Send(fd, lights_on_buf, strlen(send_cmd_to_com));
+			if(len > 0){
+                                printf(" %x %x %x %x %x %x send data successful len=%d \n",lights_on_buf[0], lights_on_buf[1],lights_on_buf[2],lights_on_buf[3],lights_on_buf[4],lights_on_buf[5],len);
+                        }else{
+                                printf("send data failed!\n");
+                        }
+			
+		}else if(!strcmp(send_cmd_to_com, "lights off")){
+			len = UARTx_Send(fd, lights_off_buf, strlen(send_cmd_to_com));
+                        if(len > 0){
+                                printf(" %x %x %x %x %x %x send data successful len=%d \n",lights_off_buf[0], lights_off_buf[1],lights_off_buf[2],lights_off_buf[3],lights_off_buf[4],lights_off_buf[5],len);
+                        }else{
+                                printf("send data failed!\n");
+                        }
+		}else if(!strcmp(send_cmd_to_com, "stop")){
+			len = UARTx_Send(fd, stop_buf, strlen(send_cmd_to_com));
+                        if(len > 0){
+                                printf(" %x %x %x %x %x %x send data successful len=%d \n",stop_buf[0], stop_buf[1],stop_buf[2],stop_buf[3],stop_buf[4],stop_buf[5],len);
+                        }else{
+                                printf("send data failed!\n");
+                        }
+
+		}else if(!strcmp(send_cmd_to_com, "head down")){
+			UARTx_Send(fd, head_down_buf, strlen(send_cmd_to_com));
+		}else if(!strcmp(send_cmd_to_com, "foot up")){
+                        UARTx_Send(fd, foot_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "foot down")){
+                        UARTx_Send(fd, foot_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "foot up")){
+                        UARTx_Send(fd, foot_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "leg up")){
+                        UARTx_Send(fd, leg_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "leg down")){
+                        UARTx_Send(fd, leg_down_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "lumbar up")){
+                        UARTx_Send(fd, lumbar_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "lumbar down")){
+                        UARTx_Send(fd, lumbar_down_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "flat")){
+                        UARTx_Send(fd, flat_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "antisnore")){
+                        UARTx_Send(fd, antisnore_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "lounge")){
+                        UARTx_Send(fd, lounge_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "zero gravity")){
+                        UARTx_Send(fd, zero_gravity_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "incline")){
+                        UARTx_Send(fd, incline_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "lounge program")){
+                        UARTx_Send(fd, lounge_program_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "zero gravity program")){
+                        UARTx_Send(fd, zero_gravity_program_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "incline program")){
+                        UARTx_Send(fd, incline_program_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "massage on")){
+                        UARTx_Send(fd, massage_on_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "massage up")){
+                        UARTx_Send(fd, massage_up_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "massage down")){
+                        UARTx_Send(fd, massage_down_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "massage stop")){
+                        UARTx_Send(fd, massage_stop_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "wave one")){
+                        UARTx_Send(fd, wave_one_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "wave two")){
+                        UARTx_Send(fd, wave_two_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "wave three")){
+                        UARTx_Send(fd, wave_three_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "wave four")){
+                        UARTx_Send(fd, wave_four_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "full body one")){
+                        UARTx_Send(fd, full_body_one_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "full body two")){
+                        UARTx_Send(fd, full_body_two_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "light on")){
+                        UARTx_Send(fd, light_on_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "light off")){
+			UARTx_Send(fd, light_off_buf, strlen(send_cmd_to_com));
+		}else if(!strcmp(send_cmd_to_com, "toggle light")){
+                        UARTx_Send(fd, toggle_light_buf, strlen(send_cmd_to_com));
+                }else if(!strcmp(send_cmd_to_com, "toggle lights")){
+                        UARTx_Send(fd, toggle_lights_buf, strlen(send_cmd_to_com));
+                }else{
+			printf(".");
+		}
+	}
+}
+
 /*
 int main(int argc, char **argv)  
 //int main(void)  

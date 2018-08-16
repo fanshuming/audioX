@@ -10,6 +10,38 @@
 #include<string.h> 
 #include "tty_com.h"
 
+char head_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x00};
+char head_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x01};
+char foot_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x02};
+char foot_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x03};
+char leg_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x04};
+char leg_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x05};
+char lumbar_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x06};
+char lumbar_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x07};
+char stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x0F};
+char flat_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x10};
+char antisnore_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x16};
+char lounge_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x17};
+char zero_gravity_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x13};
+char incline_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x18};
+char lounge_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x27};
+char zero_gravity_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x23};
+char incline_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x28};
+char massage_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x51};
+char wave_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x52};
+char wave_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x53};
+char wave_three_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x54};
+char wave_four_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x55};
+char full_body_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x56};
+char full_body_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x57};
+char massage_up_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x60};
+char massage_down_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x61};
+char massage_stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x6F};
+char light_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char lights_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char light_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+char lights_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+
 //宏定义  
 #define TRUE   0  
 #define FALSE  -1  
@@ -219,6 +251,7 @@ int UARTx_Send(int fd, char *send_buf,int data_len)
     int len = 0;
 
     len = write(fd,send_buf,data_len);
+    printf("len:%d,data_len:%d\n",len,data_len);
     if (len == data_len ){
         return len;
     }     
@@ -293,80 +326,30 @@ int main(int argc, char **argv)
         exit(1);    
     }
 
-    //配置串口参鏁??    err = UARTx_Set(fd,57600,0,8,1,'N');  
+    err = UARTx_Set(fd,115200,0,8,1,'N');  
     if (FALSE == err){  
         printf("Set Port Error\n"); 
         exit(1); 
     }
    
 
-    for( i = 0; i < 100; i++ )
-    {
-        len = UARTx_Send(fd, light_on_buf, strlen(light_off_buf));
+
+
+
+
+    for(i=0;i<1000;i++){
+        len = UARTx_Send(fd, head_up_buf, 6);
         if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len);
-        else
-            printf("send data failed!\n");
-    }
+		printf(" %x %x %x %x %x %x send head up data successful len=%d \n",head_up_buf[0],head_up_buf[1],head_up_buf[2],head_up_buf[3],head_up_buf[4],head_up_buf[5],len);
+        }
+/*
 
-
-
-    for( i = 0; i < 100; i++ )  
-    {  
-        len = UARTx_Send(fd, light_off_buf, strlen(light_off_buf));  
-        if(len > 0)  
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len);  
-        else  
-            printf("send data failed!\n"); 
-    }
-
-    for( i = 0; i < 1000; i++ ) 
-    {
-        len = UARTx_Send(fd, massage_on_buf, strlen(light_off_buf));
+   for(i=0;i<50;i++){
+        len = UARTx_Send(fd, light_on_buf, strlen(light_on_buf));
         if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len); 
-        else
-            printf("send data failed!\n");
-    }
+                printf(" %x %x %x %x %x %x send light on data successful len=%d \n",light_on_buf[0],light_on_buf[1],light_on_buf[2],light_on_buf[3],light_on_buf[4],light_on_buf[5],len);
+        }
 
-    for( i = 0; i < 1000; i++ )
-    {
-        len = UARTx_Send(fd, massage_up_buf, strlen(light_off_buf));
-        if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len); 
-        else
-            printf("send data failed!\n");
-    }
-
-
-    for( i = 0; i < 1000; i++ )
-    {
-        len = UARTx_Send(fd, massage_stop_buf, strlen(light_off_buf));
-        if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len); 
-        else
-            printf("send data failed!\n");
-    }
-
-
-    for( i = 0; i < 1000; i++ )
-    {
-        len = UARTx_Send(fd, leg_up_buf, strlen(light_off_buf));
-        if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len); 
-        else
-            printf("send data failed!\n");
-    }
-
-
-    for( i = 0; i < 1000; i++ )
-    {
-        len = UARTx_Send(fd, leg_down_buf, strlen(light_off_buf));
-        if(len > 0)
-            printf(" %x %x %x %x %x %x send data successful len=%d \n",light_off_buf[0],light_off_buf[1],light_off_buf[2],light_off_buf[3],light_off_buf[4],light_off_buf[5],len); 
-        else
-            printf("send data failed!\n");
-    }
 
 
 
@@ -379,7 +362,7 @@ int main(int argc, char **argv)
             printf("send data failed!\n");
     }
 
-
+*/
 
     len = 0 ;
     while(1) 
@@ -387,6 +370,7 @@ int main(int argc, char **argv)
         len = read(fd, rcv_buf, 256);  
 
         if(len > 0){
+	    printf("rcv_buf:%s\n",rcv_buf);
             rcv_buf[len] = '\n';
             UARTx_Send(fd,rcv_buf,len+1);
             printf("len=%d uart_RX_ok \n", len); 
