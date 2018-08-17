@@ -156,6 +156,7 @@ void * record_from_dev(void * ringb)
 		if(!get_mic_status())	
 		{
 			snd_pcm_readi(recHandle, testbuf, 2048);
+			ringbuffer_reset(ring_buf);
 			continue;
 		}
 

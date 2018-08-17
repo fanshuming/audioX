@@ -343,35 +343,13 @@ void * send_data_to_com_thread(void * data)
 		sleep(1);
 		//printf("send data:%s\n",send_cmd_to_com);
 		if(!strcmp(send_cmd_to_com, "head up")){
-			len = UARTx_Send(fd, head_up_buf, strlen(send_cmd_to_com));
-			if(len > 0){
-				printf(" %x %x %x %x %x %x send data successful len=%d \n",head_up_buf[0],head_up_buf[1],head_up_buf[2],head_up_buf[3],head_up_buf[4],head_up_buf[5],len);
-			}else{
-				printf("send data failed!\n");
-			}
+			UARTx_Send(fd, head_up_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "lights on")){
-			len = UARTx_Send(fd, lights_on_buf, strlen(send_cmd_to_com));
-			if(len > 0){
-                                printf(" %x %x %x %x %x %x send data successful len=%d \n",lights_on_buf[0], lights_on_buf[1],lights_on_buf[2],lights_on_buf[3],lights_on_buf[4],lights_on_buf[5],len);
-                        }else{
-                                printf("send data failed!\n");
-                        }
-			
+			UARTx_Send(fd, lights_on_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "lights off")){
-			len = UARTx_Send(fd, lights_off_buf, strlen(send_cmd_to_com));
-                        if(len > 0){
-                                printf(" %x %x %x %x %x %x send data successful len=%d \n",lights_off_buf[0], lights_off_buf[1],lights_off_buf[2],lights_off_buf[3],lights_off_buf[4],lights_off_buf[5],len);
-                        }else{
-                                printf("send data failed!\n");
-                        }
+			UARTx_Send(fd, lights_off_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "stop")){
-			len = UARTx_Send(fd, stop_buf, strlen(send_cmd_to_com));
-                        if(len > 0){
-                                printf(" %x %x %x %x %x %x send data successful len=%d \n",stop_buf[0], stop_buf[1],stop_buf[2],stop_buf[3],stop_buf[4],stop_buf[5],len);
-                        }else{
-                                printf("send data failed!\n");
-                        }
-
+			UARTx_Send(fd, stop_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "head down")){
 			UARTx_Send(fd, head_down_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "foot up")){

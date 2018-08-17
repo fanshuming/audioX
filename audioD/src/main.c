@@ -76,11 +76,13 @@
 #include "sub_client.h"
 #include "microphone.h"
 #include "sem.h"
+#include "timer.h"
 
 #define   FIFO_SIZE     4194304
 
 int blink_cnt = 0;
 
+unsigned int blink_times = 0;
 
 static const arg_t cont_args_def[] = {
     POCKETSPHINX_OPTIONS,
@@ -257,6 +259,46 @@ void sigalrm_led(int sig)
     return;
 }
 
+void alarm_handle_recognize_ok(int sig)
+{
+	//LOGD("200ms timeout\n");
+	blink_times++;
+	
+	if((blink_times % 2) == 0)
+	{
+		led_off();
+	}else
+	{
+		led_on();
+	}	
+
+	if(blink_times > 5)
+	{
+		led_off();
+		unset_time();
+	}
+}
+
+void alarm_handle_recognize_fail(int sig)
+{
+        printf("1s timeout\n");
+        blink_times++;
+
+        if((blink_times % 2) == 0)
+        {
+                led_off();
+        }else
+        {
+                led_on();
+        }
+
+        if(blink_times > 5)
+        {
+                led_off();
+                unset_time();
+        }
+}
+
 /*
  * Main utterance processing loop:
  *     for (;;) {
@@ -300,8 +342,8 @@ recognize_from_microphone( struct ringbuffer * ringB)
 
         if (ringbuffer_is_empty(ring_buf)) 
 	{
-		  sleep_msec(1000);
-                  printf("buffer is empty !\n");
+		  //sleep_msec(1000);
+                  //printf("buffer is empty !\n");
 		  continue;
         }
 
@@ -341,9 +383,15 @@ recognize_from_microphone( struct ringbuffer * ringB)
                 printf("%s\n", hyp);
 		//add led
                 //blink_cnt = 0;
-                signal(SIGALRM, sigalrm_led);
-                led_on();
-                alarm(1);
+                //signal(SIGALRM, sigalrm_led);
+
+		blink_times = 0;
+		unset_time();
+	        signal(SIGALRM, alarm_handle_recognize_ok);
+
+   		set_time(0,300000);
+
+                //alarm(1);
 
 
 		memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
@@ -352,7 +400,14 @@ recognize_from_microphone( struct ringbuffer * ringB)
 		set_mic_enable(false);
 
                 fflush(stdout);
-            }
+            }else{
+		LOGD("voice command invalid\n");
+		blink_times = 0;
+                unset_time();
+                signal(SIGALRM, alarm_handle_recognize_fail);
+
+                set_time(1,0);
+	    }
 	    
 	    ringbuffer_reset(ring_buf);
 

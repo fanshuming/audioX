@@ -11,6 +11,7 @@
 #define LED_OFF  1
 
 int ledFd;
+static int led_status = 0;
 
 int led_init()
 {
@@ -28,6 +29,8 @@ void led_on()
 	ledFd = open("/dev/gpio_drv" , O_RDWR|O_NONBLOCK);
 	ioctl(ledFd, LED_ON);
 	close(ledFd);
+	led_status = 1;
+
 	return;	
 }
 
@@ -36,8 +39,16 @@ void led_off()
 	 ledFd = open("/dev/gpio_drv" , O_RDWR|O_NONBLOCK);
 	 ioctl(ledFd, LED_OFF);
 	 close(ledFd);
+	 led_status = 0;
+
 	 return;
 }
+
+int get_led_status()
+{
+	return led_status;
+}
+
 
 /*
 void print_usage(char *file)

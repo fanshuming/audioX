@@ -243,8 +243,8 @@ int xfm_i2c(void) {
 	LOGD("read 101 data is %04x\n", temp);
 
 	i2c_read_proc(fd, xfm10213_ADDR, reg111, (unsigned char *)&temp, 2);
-	DELAY_MS(200);
-	set_mic_enable(true);
+	DELAY_MS(300);
+	//set_mic_enable(true);
 	LOGD("read 111 data is %04x\n", temp);
 #endif
 

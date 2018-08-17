@@ -18,6 +18,9 @@
 #include "log.h"
 #include "microphone.h"
 #include "sem.h"
+#include "timer.h"
+#include <signal.h>
+#include "led.h"
 
 #define SHELL_LINE_NUMBER 25
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
@@ -39,6 +42,18 @@ bool get_mic_status(){
 
 	return mic_wake_enable_flag;
 }
+
+
+
+void alarm_handle(int sig)
+{
+   printf("5 seconds timeout, led off\n");
+
+   led_off();
+
+   unset_time();
+}
+
 
 /****************************************************************
  * gpio_export
@@ -225,8 +240,9 @@ void * microphone_wakeup_poll_thread(void * arg)
     char *buf[MAX_BUF];
     unsigned int gpio;
     int ret = 0;
-	char signal_user1_cmd[128] = {0};
-	bool first_poll_flag = true;
+    char signal_user1_cmd[128] = {0};
+    bool first_poll_flag = true;
+    unsigned int interupt_times = 0;
 
     gpio = 11;//atoi(argv[1]);
 
@@ -279,25 +295,33 @@ void * microphone_wakeup_poll_thread(void * arg)
             if(ret == -1){
                perror("read");
             }
-			LOGD("\n");
+
+	    LOGD("\n");
             LOGD("events 0x%x monitor,events 0x%x received, gpio%d interrupt has occurred.\n", POLLPRI,fdset[0].revents,gpio);
+	    signal(SIGALRM, alarm_handle);
+   	    set_time(5,0);
+	    led_on();
+
+
+            if(interupt_times < 2)
+	    {
+		LOGD("interupt_times:%d\n",interupt_times);
+		interupt_times++;
+		continue;
+	    }else{
+		first_poll_flag = false;
+	    }
+
 
 			/* notice mic wake interrupt */
-			if(!first_poll_flag) {
-				/* when post wake up sem, the device enter into recording mode, while can to be awaken again.
-				after recording, isr thread  will enable this flag, and recovery status */
-				/*
-				if(mic_wake_enable_flag) {
-					printf("post wake up\n");
-					sem_post(&sem_mic_wakeup);
-					mic_wake_enable_flag = false;
-				}
-				*/
-				mic_wake_enable_flag = true;
-				printf("wakeup start_record:%d\n",mic_wake_enable_flag);
-			} else {
-				first_poll_flag = false;
-			}
+	   if(!first_poll_flag) {
+
+		mic_wake_enable_flag = true;
+		LOGD("wakeup start_record:%d\n",mic_wake_enable_flag);
+            } else {
+
+		first_poll_flag = false;
+	    }
         }
 
         fflush(stdout);
