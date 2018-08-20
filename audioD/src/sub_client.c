@@ -63,6 +63,7 @@ void my_message_callback(struct mosquitto *mosq, void *obj, const struct mosquit
 			//send message to tty com port
 			memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
                 	memcpy(send_cmd_to_com, message->payload, strlen(message->payload) / sizeof(char));
+			send_data_to_com(ttyfd);
 	
 			if(cfg->eol){
 				printf("\n");

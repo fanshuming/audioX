@@ -84,6 +84,8 @@ int blink_cnt = 0;
 
 unsigned int blink_times = 0;
 
+//int ttyfd;
+
 static const arg_t cont_args_def[] = {
     POCKETSPHINX_OPTIONS,
     /* Argument file. */
@@ -336,7 +338,7 @@ recognize_from_microphone( struct ringbuffer * ringB)
     E_INFO("Ready....\n");
 
 // add read data for debug
-    FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
+    //FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
 
     for (;;) {
 
@@ -360,7 +362,7 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	}
 	
 	// add read data for debug
-	fwrite(adbuf, 2, k, outcaptureFp);
+	//fwrite(adbuf, 2, k, outcaptureFp);
 
         //if ((k = ad_read(ad, adbuf, 2048, captureFp)) < 0)
         //    E_FATAL("Failed to read audio\n");
@@ -396,6 +398,7 @@ recognize_from_microphone( struct ringbuffer * ringB)
 
 		memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
 		memcpy(send_cmd_to_com, hyp, strlen(hyp) / sizeof(char));
+		send_data_to_com(ttyfd);
 		
 		set_mic_enable(false);
 
@@ -435,13 +438,22 @@ main(int argc, char *argv[])
 
     struct ringbuffer *ring_buf;
     pthread_t record_pid;
-    pthread_t send_data_to_com_thread_pid;
+   // pthread_t send_data_to_com_thread_pid;
     pthread_t mosq_pid;
     pthread_t mic_wakeup_thread_id;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 
     sem_init(&sem_mic_wakeup, 0, 0);
+
+
+    ttyfd = UARTx_Open(ttyfd, "/dev/ttyS0");
+
+    if(FALSE == ttyfd)
+    {
+    	exit(1);
+    }
+
 
     /* Handle argument file as -argfile. */
     if (config && (cfg = cmd_ln_str_r(config, "-argfile")) != NULL) {
@@ -470,7 +482,7 @@ main(int argc, char *argv[])
 	// record data from dev
         ring_buf = ringbuffer_create(FIFO_SIZE);
 	pthread_create(&record_pid, NULL, record_from_dev, ring_buf);
-	pthread_create(&send_data_to_com_thread_pid, NULL, send_data_to_com_thread, NULL);
+	//pthread_create(&send_data_to_com_thread_pid, NULL, send_data_to_com_thread, NULL);
 	pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 	pthread_create(&mic_wakeup_thread_id, NULL, microphone_wakeup_poll_thread, NULL);
 	
@@ -482,7 +494,7 @@ main(int argc, char *argv[])
     cmd_ln_free_r(config);
 
     pthread_join(record_pid, NULL);
-    pthread_join(send_data_to_com_thread_pid, NULL);
+   // pthread_join(send_data_to_com_thread_pid, NULL);
     pthread_join(mosq_pid, NULL);
     pthread_join(mic_wakeup_thread_id, NULL);
 

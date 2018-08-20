@@ -100,6 +100,8 @@ static int setparams(snd_pcm_t * handle)
     	printf("-----------------frames:%d\n",frames);
 
 	//set i2c to enablle ifly mic
+	//upgrage_pak();
+
     	xfm_i2c();
 
 	//set_mic_enable(true);

@@ -10,6 +10,8 @@
 #include<string.h> 
 
 #include "tty_com.h"
+#include "log.h"
+int ttyfd;
 
 char head_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x00};
 char head_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x01};
@@ -314,9 +316,10 @@ int UARTx_Open(int fd, const char * ttyX)
 * 名称：    main
 *******************************************************************/
 
-void * send_data_to_com_thread(void * data)
+//void * send_data_to_com_thread(void * data)
+void send_data_to_com( int fd)
 {
-	int fd;                            //文件描述符  
+	//int fd;                            //文件描述符  
     	int err;                           //返回调用函数的状态  
     	int len;
 
@@ -324,12 +327,13 @@ void * send_data_to_com_thread(void * data)
     	//fd = UART0_Open(fd,argv[1]); //打开串口，返回文件描述符  
 	//fd = UARTx_Open(fd); //打开串口，返回文件描述符  
 
+/*
 	fd = UARTx_Open(fd, "/dev/ttyS0");
 
     	if(FALSE == fd){
         	exit(1);
 	}
-
+*/
 	/*
 	配置串口参????    err = UARTx_Set(fd,57600,0,8,1,'N');  
     	if (FALSE == err){
@@ -339,13 +343,16 @@ void * send_data_to_com_thread(void * data)
 	*/
 
 
-	while(1){
-		sleep(1);
-		//printf("send data:%s\n",send_cmd_to_com);
+	//while(1){
+	//	sleep(1);
+		printf("send data:%s\n",send_cmd_to_com);
 		if(!strcmp(send_cmd_to_com, "head up")){
 			UARTx_Send(fd, head_up_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "lights on")){
-			UARTx_Send(fd, lights_on_buf, strlen(send_cmd_to_com));
+			len=UARTx_Send(fd, lights_on_buf, 6);
+			if(len>0){
+				LOGD("send data len:%d\n",len);
+			}
 		}else if(!strcmp(send_cmd_to_com, "lights off")){
 			UARTx_Send(fd, lights_off_buf, strlen(send_cmd_to_com));
 		}else if(!strcmp(send_cmd_to_com, "stop")){
@@ -413,7 +420,7 @@ void * send_data_to_com_thread(void * data)
                 }else{
 			printf(".");
 		}
-	}
+	//}
 }
 
 /*

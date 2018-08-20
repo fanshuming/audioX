@@ -96,17 +96,9 @@ static int i2c_download_proc(int fd,unsigned char addr,unsigned char *val,unsign
 
 }
 
-int xfm_i2c(void) {
+int upgrage_pak(void) {
 	int fd;
 	int ret;
-
-	
-	system("echo 1 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	sleep(1);
-	system("echo 0 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	sleep(1);
-	system("echo 1 > /sys/class/leds/qizhi:ephyled4:mic/brightness");
-	
 
 	fd = open(I2C_DEFDEV_NAME, O_RDWR);
 	if (fd < 0) {
@@ -121,53 +113,49 @@ int xfm_i2c(void) {
 	}
 
 #if 0
-//open upgrade.pak
-        LOGD("load pak start\n");
-	FILE *src_fp_update_pak = fopen("./upgrade.pak","rb");
-	if(src_fp_update_pak == NULL)
+//open xfm10213.ldr
+	FILE *src_fp_update = fopen("./xfm10213.ldr","rb");
+	if(src_fp_update == NULL)
 	{
-		LOGD("upgrade.pak file not found\n");
+		LOGD("xfm10213.ldr file not found\n");
 		return 0;
 	}
-	fseek(src_fp_update_pak, 0L, SEEK_END);
-	unsigned int src_fp_len_update_pak = ftell(src_fp_update_pak);
-	char *buf_update_pak = (char *)malloc(src_fp_len_update_pak);
-	memset(buf_update_pak, 0, src_fp_len_update_pak);
-	fseek(src_fp_update_pak, 0L, SEEK_SET);
+	fseek(src_fp_update, 0L, SEEK_END);
+	unsigned int src_fp_len_update = ftell(src_fp_update);
+	char *buf_update = (char *)malloc(src_fp_len_update);
+	memset(buf_update,0,src_fp_len_update);
+	fseek(src_fp_update,0L,SEEK_SET);
 
-	fread(buf_update_pak, 1, src_fp_len_update_pak, src_fp_update_pak);
-	unsigned char r2w_update_pak = 32;//255;
-	int down_count_update_pak = 0;
+	fread(buf_update,1,src_fp_len_update,src_fp_update);
+	unsigned char r2w_update = 32;//255;
+	int down_count_update = 0;
 	while(1)
 	{
-		if(src_fp_len_update_pak >= r2w_update_pak)
+		if(src_fp_len_update >= r2w_update)
 		{
-			down_count_update_pak++;
-			ret = i2c_download_proc(fd, xfm10213_ADDR, buf_update_pak, r2w_update_pak);
+			down_count_update++;
+			ret = i2c_download_proc(fd, xfm10213_ADDR, buf_update, r2w_update);
 			if(ret == -1) {
 				LOGE("download error\n");
 				break;
 			}
-			src_fp_len_update_pak -= r2w_update_pak;
-			buf_update_pak += r2w_update_pak;
+			src_fp_len_update -= r2w_update;
+			buf_update += r2w_update;
 		}
 		else
 		{
-			down_count_update_pak++;
-			i2c_download_proc(fd,xfm10213_ADDR,buf_update_pak,src_fp_len_update_pak);
-			LOGD("====================down_count=%d\n", down_count_update_pak);
+			down_count_update++;
+			i2c_download_proc(fd,xfm10213_ADDR,buf_update,src_fp_len_update);
+			LOGD("====================down_count=%d\n", down_count_update);
 			break;
 		}
 	}
-	fclose(src_fp_update_pak);
-        LOGD("load pak done\n");
+	fclose(src_fp_update);
 	DELAY_MS(2000);
 #endif
-	//open xfm10213.ldr
-	//FILE *src_fp = fopen("./upgrade.pak","rb");
-        LOGD("load ldr start\n");
-
-	FILE *src_fp = fopen("./xfm10213.ldr","rb");
+	//open upgrade.pak
+	FILE *src_fp = fopen("./upgrade.pak","rb");
+	//FILE *src_fp = fopen("./xfm10213.ldr","rb");
 	if(src_fp == NULL)
 	{
 		LOGD("xfm10213.ldr file not found\n");
@@ -180,7 +168,9 @@ int xfm_i2c(void) {
 	fseek(src_fp,0L,SEEK_SET);
 
 	fread(buf,1,src_fp_len,src_fp);
-	unsigned char r2w = 32;//255;
+	LOGD("src_fp_len:%d\n",src_fp_len);
+
+	unsigned char r2w = 32;//255;//32;
 	int down_count = 0;
 	while(1)
 	{
@@ -206,7 +196,7 @@ int xfm_i2c(void) {
 	fclose(src_fp);
 	DELAY_MS(2000);
 
-#if 1
+#if 0
 	unsigned int temp = 0x0000;
 	//
 	unsigned int data_mode = 0x0200;      //写入的是0002
@@ -252,22 +242,6 @@ int xfm_i2c(void) {
 	LOGD("read 111 data is %04x\n", temp);
 #endif
 
-#if 0
-	i2c_read_proc(fd, xfm10213_ADDR, reg101, (unsigned char *)&temp, 2);
-	DELAY_MS(200);
-	LOGD("read 101 data is %04x\n", temp);
-	i2c_write_proc(fd,xfm10213_ADDR, reg110, (unsigned char *)&data_mode, 2);
-	DELAY_MS(200);
-	i2c_read_proc(fd, xfm10213_ADDR, reg101, (unsigned char *)&temp, 2);
-	DELAY_MS(200);
-	LOGD("101 data is %08X\n", temp);
-	i2c_read_proc(fd, xfm10213_ADDR, reg110, (char *)&temp, 2);
-	LOGD("110 data is %08X\n", temp);
-	DELAY_MS(200);
-	i2c_read_proc(fd, xfm10213_ADDR, reg111, (char *)&temp, 2);
-	LOGD("111 data is %08X\n", temp);
-	DELAY_MS(200);
-#endif
 
 #endif
 	return 0;
