@@ -60,7 +60,7 @@ void * dht11_loop()
 		printf("the current temperature is: %d\n",temp);
 		printf("the current humidity is:    %d\n",humi);
 
-		sleep(10);
+		sleep(100);
 	}
 	close(fd);
 	

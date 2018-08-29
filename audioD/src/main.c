@@ -77,6 +77,9 @@
 #include "microphone.h"
 #include "sem.h"
 #include "timer.h"
+#include "dht11_app.h"
+
+#include <time.h>
 
 #define   FIFO_SIZE     4194304
 
@@ -322,7 +325,11 @@ recognize_from_microphone( struct ringbuffer * ringB)
 
     char const *hyp;
 
+    time_t timer;
+    struct tm *tblock;
+
     struct ringbuffer *ring_buf = ringB;
+
 
 /*
     if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
@@ -372,6 +379,11 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	//printf("ps_get_in_speech\n");
         if (in_speech && !utt_started) {
             utt_started = TRUE;
+		
+    	    timer = time(NULL);
+	    tblock = localtime(&timer);
+            printf("start time is: %s\n", asctime(tblock));
+
             E_INFO("Listening...\n");
         }
         if (!in_speech && utt_started) {
@@ -386,6 +398,10 @@ recognize_from_microphone( struct ringbuffer * ringB)
 		//add led
                 //blink_cnt = 0;
                 //signal(SIGALRM, sigalrm_led);
+			
+    		timer = time(NULL);
+	    	tblock = localtime(&timer);
+            	printf("end time is: %s\n", asctime(tblock));
 
 		blink_times = 0;
 		unset_time();
@@ -441,6 +457,7 @@ main(int argc, char *argv[])
    // pthread_t send_data_to_com_thread_pid;
     pthread_t mosq_pid;
     pthread_t mic_wakeup_thread_id;
+    pthread_t dht11_loop_id;
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 
@@ -485,6 +502,7 @@ main(int argc, char *argv[])
 	//pthread_create(&send_data_to_com_thread_pid, NULL, send_data_to_com_thread, NULL);
 	pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 	pthread_create(&mic_wakeup_thread_id, NULL, microphone_wakeup_poll_thread, NULL);
+	pthread_create(&dht11_loop_id, NULL, dht11_loop, NULL);
 	
 	// recognize
         recognize_from_microphone(ring_buf);
@@ -497,6 +515,7 @@ main(int argc, char *argv[])
    // pthread_join(send_data_to_com_thread_pid, NULL);
     pthread_join(mosq_pid, NULL);
     pthread_join(mic_wakeup_thread_id, NULL);
+    pthread_join(dht11_loop_id, NULL);
 
     ringbuffer_destroy(ring_buf);
 

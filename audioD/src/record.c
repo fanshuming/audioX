@@ -140,7 +140,7 @@ void * record_from_dev(void * ringb)
 	int err;
 	int ret = 0;
 
-	FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
+	//FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
 
 	struct ringbuffer *ring_buf = (struct ringbuffer *)ringb;
 
@@ -209,7 +209,7 @@ void * record_from_dev(void * ringb)
                         p+=1;
     	   }
 
-    	   fwrite(data_buf, 1, j, incaptureFp);
+//    	   fwrite(data_buf, 1, j, incaptureFp);
 
            	if (ringbuffer_is_full(ring_buf)) {
                         printf("buffer is full !\n");
@@ -218,7 +218,7 @@ void * record_from_dev(void * ringb)
                 }
 	   //printf("send length :%d data to ring buffer\n",length);
                 ringbuffer_put(ring_buf, data_buf, 2048);
-		sleep(0.5);
+	   //	sleep(0.5);
 	}
 }
 
