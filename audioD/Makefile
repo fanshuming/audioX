@@ -1,5 +1,9 @@
 .PHONY: clean
-  
+
+DATE = $(shell date "+%Y%m%d")  
+
+#$(info $(DATE) )
+
 CURRENT_DIR = $(shell pwd)
 
 CC = mipsel-openwrt-linux-gcc
@@ -27,6 +31,7 @@ $(TARGET) : $(OBJECTS)
 install : $(TARGET)
 	$(INSTALL) -d ./bin
 	$(INSTALL) -s --strip-program=${STRIP} $(TARGET) $(BIN_TARGET)
+	echo $(DATE) > $(CURRENT_DIR)/resource/version
 
 uninstall :
 	-rm -f $(BIN_TARGET)
