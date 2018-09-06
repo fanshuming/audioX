@@ -4,7 +4,7 @@ CURRENT_DIR = $(shell pwd)
 
 CC = mipsel-openwrt-linux-gcc
 CFLAGS = -I ./include -O3
-LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase -lsphinxad -lpthread -lcares  -lcrypto -lssl -L ./lib/alsa_lib -lasound -lmosquitto
+LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase -lsphinxad -lpthread -lcares -lcurl -lmbedtls -lcrypto -lssl -L ./lib/alsa_lib -lasound -lmosquitto -lm
 #LDFLAGS = -L ./lib -lpocketsphinx -lsphinxbase -lsphinxad -lpthread -lcares  -lcrypto -lssl  -lmosquitto
 
 INSTALL = install

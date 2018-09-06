@@ -22,6 +22,7 @@
 
 //int16 data_buf[4096]={0};
 int16 data_buf[2048]={0};
+//int16 data_buf1[2048]={0};
 //char data_buf[4096]={0};
 
 static int setparams(snd_pcm_t * handle)
@@ -30,6 +31,7 @@ static int setparams(snd_pcm_t * handle)
     	unsigned int out_sps, buffer_time, period_time;
     	int err;
     	int dir = 0;
+	int val = 0;
 
     	snd_pcm_hw_params_alloca(&hwparams);
     	err = snd_pcm_hw_params_any(handle, hwparams);
@@ -56,6 +58,8 @@ static int setparams(snd_pcm_t * handle)
         	fprintf(stderr, "Failed to set PCM device to mono: %s\n",snd_strerror(err));
         	return -1;
     	}
+	//snd_pcm_hw_params_get_channels(hwparams, &val);
+        //printf("=====================================================channels:%d\n", val);
 
     	out_sps = 16000;
     	err = snd_pcm_hw_params_set_rate_near(handle, hwparams, &out_sps, &dir);
@@ -140,7 +144,8 @@ void * record_from_dev(void * ringb)
 	int err;
 	int ret = 0;
 
-	//FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
+//	FILE *incaptureFp = fopen("/tmp/incapture.pcm","wb");
+//	FILE *incaptureFp1 = fopen("/tmp/incapture1.pcm","wb");
 
 	struct ringbuffer *ring_buf = (struct ringbuffer *)ringb;
 
@@ -201,15 +206,18 @@ void * record_from_dev(void * ringb)
 	    int16 *p = buf;
     	    int i = 0;
     	    int j = 0;
+	    //int k = 0;
 
            for(i = 0;i<length*1*1;)
            {
                         data_buf[j++]=*(p++);
                         i+=1;
                         p+=1;
+			//data_buf1[k++] = *(p);
     	   }
 
 //    	   fwrite(data_buf, 1, j, incaptureFp);
+//    	   fwrite(data_buf1, 1, k, incaptureFp1);
 
            	if (ringbuffer_is_full(ring_buf)) {
                         printf("buffer is full !\n");

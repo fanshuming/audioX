@@ -81,6 +81,8 @@
 
 #include <time.h>
 
+#include "curl_down.h"
+
 #define   FIFO_SIZE     4194304
 
 int blink_cnt = 0;
@@ -175,6 +177,9 @@ recognize_from_file()
     uint8 utt_started, in_speech;
     int32 print_times = cmd_ln_boolean_r(config, "-time");
 
+    time_t timer;
+    struct tm *tblock;
+
     fname = cmd_ln_str_r(config, "-infile");
     if ((rawfd = fopen(fname, "rb")) == NULL) {
         E_FATAL_SYSTEM("Failed to open file '%s' for reading",
@@ -195,6 +200,9 @@ recognize_from_file()
     ps_start_utt(ps);
     utt_started = FALSE;
 
+    	    timer = time(NULL);
+	    tblock = localtime(&timer);
+            printf("start time is: %s\n", asctime(tblock));
     while ((k = fread(adbuf, sizeof(int16), 2048, rawfd)) > 0) {
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
         in_speech = ps_get_in_speech(ps);
@@ -206,6 +214,9 @@ recognize_from_file()
             hyp = ps_get_hyp(ps, NULL);
             if (hyp != NULL)
         	printf("%s\n", hyp);
+    	    timer = time(NULL);
+	    tblock = localtime(&timer);
+            printf("end time is: %s\n", asctime(tblock));
             if (print_times)
         	print_word_times();
             fflush(stdout);
@@ -219,6 +230,9 @@ recognize_from_file()
         hyp = ps_get_hyp(ps, NULL);
         if (hyp != NULL) {
     	    printf("%s\n", hyp);
+    	    timer = time(NULL);
+	    tblock = localtime(&timer);
+            printf("end time is: %s\n", asctime(tblock));
     	    if (print_times) {
     		print_word_times();
 	    }
@@ -318,6 +332,7 @@ recognize_from_microphone( struct ringbuffer * ringB)
     ad_rec_t *ad;
     int16 adbuf1[1024];
     int16 adbuf2[1024];
+    //int16 adbuf2[1024];
     int16 adbuf[2048];
     uint8 utt_started, in_speech;
     uint32 k;
@@ -331,32 +346,24 @@ recognize_from_microphone( struct ringbuffer * ringB)
     struct ringbuffer *ring_buf = ringB;
 
 
-/*
-    if ((ad = ad_open_dev(cmd_ln_str_r(config, "-adcdev"),(int) cmd_ln_float32_r(config,"-samprate"))) == NULL)
-        E_FATAL("Failed to open audio device\n");
-
-    if (ad_start_rec(ad) < 0)
-        E_FATAL("Failed to start recording\n");
-*/
-
     if (ps_start_utt(ps) < 0)
         E_FATAL("Failed to start utterance\n");
     utt_started = FALSE;
     E_INFO("Ready....\n");
 
 // add read data for debug
-    //FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
+    FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
 
     for (;;) {
 
         if (ringbuffer_is_empty(ring_buf)) 
 	{
-		  //sleep_msec(1000);
-                  //printf("buffer is empty !\n");
-		  continue;
+        	sleep_msec(100);
+		continue;
         }
 
-        //k = ringbuffer_get(ring_buf, adbuf, 2048);
+//       k = ringbuffer_get(ring_buf, adbuf, 2048);
+
        k = ringbuffer_get(ring_buf, adbuf1, 2048);
        k = ringbuffer_get(ring_buf, adbuf2, 2048);
 	
@@ -369,14 +376,10 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	}
 	
 	// add read data for debug
-	//fwrite(adbuf, 2, k, outcaptureFp);
+	fwrite(adbuf, 2, k, outcaptureFp);
 
-        //if ((k = ad_read(ad, adbuf, 2048, captureFp)) < 0)
-        //    E_FATAL("Failed to read audio\n");
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
-	//printf("ps_process_raw\n");
         in_speech = ps_get_in_speech(ps);
-	//printf("ps_get_in_speech\n");
         if (in_speech && !utt_started) {
             utt_started = TRUE;
 		
@@ -387,17 +390,10 @@ recognize_from_microphone( struct ringbuffer * ringB)
             E_INFO("Listening...\n");
         }
         if (!in_speech && utt_started) {
-            // speech -> silence transition, time to start new utterance 
-	    //printf("speech to silence\n");
             ps_end_utt(ps);
-	    //printf("ps_end_utt\n");
             hyp = ps_get_hyp(ps, NULL );
-	    //printf("ps_get_hyp\n");
             if (hyp != NULL) {
                 printf("%s\n", hyp);
-		//add led
-                //blink_cnt = 0;
-                //signal(SIGALRM, sigalrm_led);
 			
     		timer = time(NULL);
 	    	tblock = localtime(&timer);
@@ -408,9 +404,6 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	        signal(SIGALRM, alarm_handle_recognize_ok);
 
    		set_time(0,300000);
-
-                //alarm(1);
-
 
 		memset(send_cmd_to_com, 0 , strlen(send_cmd_to_com));
 		memcpy(send_cmd_to_com, hyp, strlen(hyp) / sizeof(char));
@@ -458,6 +451,31 @@ main(int argc, char *argv[])
     pthread_t mosq_pid;
     pthread_t mic_wakeup_thread_id;
     pthread_t dht11_loop_id;
+
+    char * binUrl;
+
+    // upgrate img from ota
+
+    get_version();
+
+    if((access("/tmp/version.json", F_OK)) != -1)
+    {
+    	binUrl = (char *) parse_json("/tmp/version.json");
+        if(binUrl != NULL)
+	{
+    		LOGD("new version found, download ...\n");
+    		url2file(binUrl, "/tmp/upgrade.bin");
+
+    		LOGD("upgrade ...\n");
+    		system("sysupgrade  /tmp/upgrade.bin");
+	}else{
+		LOGD("current version is the latest.\n");
+	}
+    }else{
+	LOGD("the file /tmp/version.json don't exist!\n");
+    }
+
+
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 

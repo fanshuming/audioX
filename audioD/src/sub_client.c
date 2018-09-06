@@ -291,7 +291,9 @@ void * mosq_loop()
 	if(rc) return;
 
 
+	printf("mosq start\n");
 	rc = mosquitto_loop_forever(mosq, -1, 1);
+	printf("mosq end\n");
 
 	mosquitto_destroy(mosq);
 	mosquitto_lib_cleanup();

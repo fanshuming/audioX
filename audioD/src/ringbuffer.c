@@ -1,7 +1,5 @@
 /**
  * Title 	: ringbuffer.c
- * Author	: zengxianbo 
- * Date		: 2014.11 @Beijing
  * Description 	: implement an ring buffer just like kfifo. Please note that
  * the data in the buffer will keep there until them be read out. If the buffer
  * is full, the data could not be put into any more, until the read action free

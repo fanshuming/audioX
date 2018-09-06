@@ -100,10 +100,10 @@ int xfm_i2c(void) {
 	int fd;
 	int ret;
 
-	system("echo 1 > /sys/class/leds/ephyled1/brightness");
-	sleep(1);
-	system("echo 0 > /sys/class/leds/ephyled1/brightness");
-	sleep(1);
+	//system("echo 1 > /sys/class/leds/ephyled1/brightness");
+	//sleep(1);
+	//system("echo 0 > /sys/class/leds/ephyled1/brightness");
+	//sleep(1);
 	//system("echo 1 > /sys/class/leds/qizhi:ephyled1:mic/brightness");
 
 	fd = open(I2C_DEFDEV_NAME, O_RDWR);
@@ -209,8 +209,9 @@ int xfm_i2c(void) {
 	//
 	unsigned int data_mode = 0x0200;      //写入的是0002
 	unsigned int data_mode2 = 0x0400;     //写入的是0004
-//	unsigned int data_chan = 0x0010;		//写入的是1256
-//	unsigned int data_chan = 0x5010;		//写入的是1256
+//	unsigned int data_chan = 0x5610;		//写入的是1256
+	//unsigned int data_chan = 0x0050;		//写入的是1256
+//	unsigned int data_chan = 0x5000;		//写入的是1256
 	unsigned int data_chan = 0x5612;		//写入的是1256
 	unsigned char reg101[2] = {0x01,0x01};
 	unsigned char reg110[2] = {0x01,0x10};
@@ -268,5 +269,6 @@ int xfm_i2c(void) {
 #endif
 
 #endif
+	close(fd);
 	return 0;
 }
