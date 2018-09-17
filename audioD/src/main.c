@@ -185,7 +185,7 @@ recognize_from_file()
         E_FATAL_SYSTEM("Failed to open file '%s' for reading",
                        fname);
     }
-/*    
+    
     if (strlen(fname) > 4 && strcmp(fname + strlen(fname) - 4, ".wav") == 0) {
         char waveheader[44];
 	fread(waveheader, 1, 44, rawfd);
@@ -196,7 +196,7 @@ recognize_from_file()
     if (strlen(fname) > 4 && strcmp(fname + strlen(fname) - 4, ".mp3") == 0) {
 	E_FATAL("Can not decode mp3 files, convert input file to WAV 16kHz 16-bit mono before decoding.\n");
     }
-*/    
+    
     ps_start_utt(ps);
     utt_started = FALSE;
 
@@ -313,8 +313,8 @@ void alarm_handle_recognize_fail(int sig)
 
         if(blink_times > 5)
         {
-                led_off();
                 unset_time();
+                led_off();
         }
 }
 
@@ -340,8 +340,8 @@ recognize_from_microphone( struct ringbuffer * ringB)
 
     char const *hyp;
 
-    time_t timer;
-    struct tm *tblock;
+    //time_t timer;
+    //struct tm *tblock;
 
     struct ringbuffer *ring_buf = ringB;
 
@@ -382,11 +382,11 @@ recognize_from_microphone( struct ringbuffer * ringB)
         in_speech = ps_get_in_speech(ps);
         if (in_speech && !utt_started) {
             utt_started = TRUE;
-		
+/*		
     	    timer = time(NULL);
 	    tblock = localtime(&timer);
             printf("start time is: %s\n", asctime(tblock));
-
+*/
             E_INFO("Listening...\n");
         }
         if (!in_speech && utt_started) {
@@ -394,11 +394,11 @@ recognize_from_microphone( struct ringbuffer * ringB)
             hyp = ps_get_hyp(ps, NULL );
             if (hyp != NULL) {
                 printf("%s\n", hyp);
-			
+/*			
     		timer = time(NULL);
 	    	tblock = localtime(&timer);
             	printf("end time is: %s\n", asctime(tblock));
-
+*/
 		blink_times = 0;
 		unset_time();
 	        signal(SIGALRM, alarm_handle_recognize_ok);

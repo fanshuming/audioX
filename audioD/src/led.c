@@ -8,7 +8,7 @@
 
 
 #define LED_ON 	0
-#define LED_OFF  1
+#define LED_OFF 1
 
 int ledFd;
 static int led_status = 0;

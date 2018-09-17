@@ -18,6 +18,7 @@ STRIP = mipsel-openwrt-linux-uclibc-strip
 TARGET = audioD
 BIN_TARGET = bin/audioD
 
+
 OBJECTS := $(patsubst %.c,%.o,$(wildcard ./src/*.c))
 
 $(TARGET) : $(OBJECTS)
@@ -31,7 +32,7 @@ $(TARGET) : $(OBJECTS)
 install : $(TARGET)
 	$(INSTALL) -d ./bin
 	$(INSTALL) -s --strip-program=${STRIP} $(TARGET) $(BIN_TARGET)
-	echo $(DATE) > $(CURRENT_DIR)/resource/version
+	@echo $(DATE) > $(CURRENT_DIR)/resource/version
 
 uninstall :
 	-rm -f $(BIN_TARGET)
