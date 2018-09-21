@@ -456,26 +456,31 @@ main(int argc, char *argv[])
 
     // upgrate img from ota
 
-    get_version();
-
-    if((access("/tmp/version.json", F_OK)) != -1)
+    if(system("ping -c 1 -w 2 120.27.138.117") == 0)
     {
-    	binUrl = (char *) parse_json("/tmp/version.json");
-        if(binUrl != NULL)
-	{
-    		LOGD("new version found, download ...\n");
-    		url2file(binUrl, "/tmp/upgrade.bin");
+    	
+	get_version();
 
-    		LOGD("upgrade ...\n");
-    		system("sysupgrade  /tmp/upgrade.bin");
-	}else{
-		LOGD("current version is the latest.\n");
-	}
+    	if((access("/tmp/version.json", F_OK)) != -1)
+    	{
+    		binUrl = (char *) parse_json("/tmp/version.json");
+        	if(binUrl != NULL)
+		{
+    			LOGD("new version found, download ...\n");
+    			url2file(binUrl, "/tmp/upgrade.bin");
+
+    			LOGD("upgrade ...\n");
+    			system("sysupgrade  /tmp/upgrade.bin");
+		}else{
+			LOGD("current version is the latest.\n");
+		}
+    	}else{
+		LOGD("the file /tmp/version.json don't exist!\n");
+   	 }
+
     }else{
-	LOGD("the file /tmp/version.json don't exist!\n");
+	LOGD("Don't check the version, net is not connected!\n");	
     }
-
-
 
     config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
 

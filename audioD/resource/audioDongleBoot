@@ -1,0 +1,24 @@
+#!/bin/sh /etc/rc.common
+START=99
+STOP=15
+ 
+start() {
+	echo start
+	linkit_mode="$(uci get wireless.radio0.linkit_mode)"
+        if [ "$linkit_mode" = "ap" ]; then
+		echo "change to sta mode" > /dev/console 2>&1
+		/usr/bin/wifi_mode sta > /dev/console 2>&1
+        else
+		echo "current mode is sta mode" > /dev/console 2>&1
+        fi
+
+	echo ==========audioD start=======================
+	cd /root
+	#/usr/bin/audioD -inmic yes -hmm smodel -dict command.dic -jsgf command.jsgf -vad_postspeech 50 -vad_prespeech 30 -vad_startspeech 10 -vad_threshold 3.0 -ds 2 -topn 2  -maxwpf 5  -maxhmmpf 3000 > /dev/console 2>&1
+	#commands to launch application, such as above
+}
+ 
+stop() {
+	echo stop
+	#commands to kill application
+}
