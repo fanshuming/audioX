@@ -352,13 +352,14 @@ recognize_from_microphone( struct ringbuffer * ringB)
     E_INFO("Ready....\n");
 
 // add read data for debug
-    FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
+    //FILE *outcaptureFp = fopen("/tmp/outcapture.pcm","wb");
 
     for (;;) {
 
         if (ringbuffer_is_empty(ring_buf)) 
 	{
-        	sleep_msec(100);
+        	//sleep_msec(100);
+		usleep(10000);
 		continue;
         }
 
@@ -376,9 +377,10 @@ recognize_from_microphone( struct ringbuffer * ringB)
 	}
 	
 	// add read data for debug
-	fwrite(adbuf, 2, k, outcaptureFp);
+	//fwrite(adbuf, 2, k, outcaptureFp);
 
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+        //ps_process_raw(ps, adbuf, k, FALSE, TRUE);
         in_speech = ps_get_in_speech(ps);
         if (in_speech && !utt_started) {
             utt_started = TRUE;
@@ -470,11 +472,14 @@ main(int argc, char *argv[])
     			url2file(binUrl, "/tmp/upgrade.bin");
 
     			LOGD("upgrade ...\n");
+			led_on();
+
     			system("sysupgrade  /tmp/upgrade.bin");
 		}else{
 			LOGD("current version is the latest.\n");
 		}
     	}else{
+		led_off();
 		LOGD("the file /tmp/version.json don't exist!\n");
    	 }
 
