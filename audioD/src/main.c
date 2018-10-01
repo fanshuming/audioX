@@ -452,7 +452,7 @@ main(int argc, char *argv[])
    // pthread_t send_data_to_com_thread_pid;
     pthread_t mosq_pid;
     pthread_t mic_wakeup_thread_id;
-    pthread_t dht11_loop_id;
+    //pthread_t dht11_loop_id;
 
     char * binUrl;
 
@@ -500,7 +500,7 @@ main(int argc, char *argv[])
     }
 
 
-    /* Handle argument file as -argfile. */
+    // Handle argument file as -argfile. 
     if (config && (cfg = cmd_ln_str_r(config, "-argfile")) != NULL) {
         config = cmd_ln_parse_file_r(config, cont_args_def, cfg, FALSE);
     }
@@ -530,7 +530,7 @@ main(int argc, char *argv[])
 	//pthread_create(&send_data_to_com_thread_pid, NULL, send_data_to_com_thread, NULL);
 	pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 	pthread_create(&mic_wakeup_thread_id, NULL, microphone_wakeup_poll_thread, NULL);
-	pthread_create(&dht11_loop_id, NULL, dht11_loop, NULL);
+	//pthread_create(&dht11_loop_id, NULL, dht11_loop, NULL);
 	
 	// recognize
         recognize_from_microphone(ring_buf);
@@ -543,7 +543,7 @@ main(int argc, char *argv[])
    // pthread_join(send_data_to_com_thread_pid, NULL);
     pthread_join(mosq_pid, NULL);
     pthread_join(mic_wakeup_thread_id, NULL);
-    pthread_join(dht11_loop_id, NULL);
+   // pthread_join(dht11_loop_id, NULL);
 
     ringbuffer_destroy(ring_buf);
 
