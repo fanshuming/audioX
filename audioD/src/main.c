@@ -452,8 +452,9 @@ main(int argc, char *argv[])
    // pthread_t send_data_to_com_thread_pid;
     pthread_t mosq_pid;
     pthread_t mic_wakeup_thread_id;
-    //pthread_t dht11_loop_id;
+    pthread_t dht11_loop_id;
 
+/*
     char * binUrl;
 
     // upgrate img from ota
@@ -487,10 +488,13 @@ main(int argc, char *argv[])
 	LOGD("Don't check the version, net is not connected!\n");	
     }
 
-    config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
+*/
 
-    sem_init(&sem_mic_wakeup, 0, 0);
+//delete offline recognize
+//    config = cmd_ln_parse_r(NULL, cont_args_def, argc, argv, TRUE);
+//    sem_init(&sem_mic_wakeup, 0, 0);
 
+    led_off();
 
     ttyfd = UARTx_Open(ttyfd, "/dev/ttyS0");
 
@@ -501,6 +505,8 @@ main(int argc, char *argv[])
 
 
     // Handle argument file as -argfile. 
+//delete offline recognize
+/*
     if (config && (cfg = cmd_ln_str_r(config, "-argfile")) != NULL) {
         config = cmd_ln_parse_file_r(config, cont_args_def, cfg, FALSE);
     }
@@ -538,14 +544,30 @@ main(int argc, char *argv[])
 
     ps_free(ps);
     cmd_ln_free_r(config);
+*/
+   pthread_create(&dht11_loop_id, NULL, dht11_loop, NULL);
 
-    pthread_join(record_pid, NULL);
+   printf("\n#####################################################\n");
+   printf("\n#######################System boot done!#############\n"); 
+   printf("\n#####################################################\n");
+
+   for(;;){
+		
+		if(system("ping -c 1 -w 2 120.27.138.117") == 0){
+    			pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
+			break;
+		}else{
+			sleep(5);
+		}
+	}
+
+//    pthread_join(record_pid, NULL);
    // pthread_join(send_data_to_com_thread_pid, NULL);
     pthread_join(mosq_pid, NULL);
-    pthread_join(mic_wakeup_thread_id, NULL);
-   // pthread_join(dht11_loop_id, NULL);
+  //  pthread_join(mic_wakeup_thread_id, NULL);
+    pthread_join(dht11_loop_id, NULL);
 
-    ringbuffer_destroy(ring_buf);
+    //ringbuffer_destroy(ring_buf);
 
     return 0;
 }

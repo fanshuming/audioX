@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <errno.h>
+
+#include "ringbuffer.h"
+
+#define	  FIFO_SIZE	256
+
+
+void * consumer_proc(void *arg)
+{
+	unsigned int cnt;
+	struct ringbuffer *ring_buf = (struct ringbuffer *)arg;
+
+	cnt = 0;
+
+	while(1)
+	{
+		sleep(2);
+		printf("------------------------------------------\n");
+		printf("get data from ring buffer.\n");
+			
+		{
+			char get_data[8];
+			
+			if (ringbuffer_is_empty(ring_buf)) {
+				printf("buffer is empty !\n");
+				sleep(1);
+				continue;
+			}
+
+			if (cnt !=0 && !(cnt % 16))
+				printf("\n");
+
+			ringbuffer_get(ring_buf, get_data, 4);
+			//ringbuffer_get(ring_buf, &i, sizeof(i));
+
+			printf("data is: %s \n", get_data);
+
+			cnt++;
+		}
+
+
+		printf("ring buffer length: %u\n", ringbuffer_len(ring_buf));
+		printf("------------------------------------------\n");
+	}
+}
+
+void * producer_proc(void *arg)
+{
+	struct ringbuffer *ring_buf = (struct ringbuffer *)arg;
+//	char i;
+//	i = 0;
+	char * data;
+	data = "abcd";	
+
+	while(1)
+	{
+		printf("******************************************\n");
+		printf("put datas :%s to ring buffer.\n",data);
+		
+
+		if (ringbuffer_is_full(ring_buf)) {
+			printf("buffer is full !\n");
+			sleep(1);
+			ringbuffer_reset(ring_buf);
+			continue;
+		}
+		ringbuffer_put(ring_buf, data, sizeof(data));
+		//ringbuffer_put(ring_buf, &i, sizeof(i));
+		//i++;
+
+		printf("ring buffer length: %u\n", ringbuffer_len(ring_buf));
+		printf("******************************************\n");
+		sleep(1);
+	}
+}
+
+
+int consumer_thread(void *arg, pthread_t * consume_pid)
+{
+	int err;
+	pthread_t tid;
+	err = pthread_create(consume_pid, NULL, consumer_proc, arg);
+	if (err != 0)
+	{
+		fprintf(stderr, "Failed to create consumer thread.errno:%u, reason:%s\n",
+				errno, strerror(errno));
+		return -1;
+	}
+
+	tid = *consume_pid;
+	return tid;
+}
+int producer_thread(void *arg, pthread_t * produce_pid)
+{
+	int err;
+	pthread_t tid;
+	err = pthread_create(produce_pid, NULL, producer_proc, arg);
+	if (err != 0)
+	{
+		fprintf(stderr, "Failed to create consumer thread.errno:%u, reason:%s\n",
+				errno, strerror(errno));
+		return -1;
+	}
+	tid = *produce_pid;
+
+	return tid;
+}
+
+
+/*
+int main(void)
+{
+	struct ringbuffer *ring_buf;
+	pthread_t produce_pid, consume_pid; 
+
+	ring_buf = ringbuffer_create(FIFO_SIZE);
+	if (!ring_buf) {
+		perror("ringbuffer_create()");
+		exit(1);
+	}
+
+	printf("multi thread test.......\n");
+
+	producer_thread((void*)ring_buf, (pthread_t *)&produce_pid);
+	consumer_thread((void*)ring_buf, (pthread_t *)&consume_pid);
+
+	pthread_join(produce_pid, NULL);
+	pthread_join(consume_pid, NULL);
+
+	ringbuffer_destroy(ring_buf);
+
+	return 0;
+}
+*/

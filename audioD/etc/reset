@@ -1,0 +1,32 @@
+#!/bin/sh
+
+[ "${ACTION}" = "released" ] || exit 0
+
+. /lib/functions.sh
+
+logger "$BUTTON pressed for $SEEN seconds"
+
+#if [ "$SEEN" -lt 1 ]
+
+
+
+if [ "$SEEN" -gt 20 ]
+then
+
+        echo "FACTORY RESET" > /dev/console
+        jffs2reset -y && reboot &
+
+elif [ "$SEEN" -gt 5 ]
+then
+	echo "upgrade system!" > /dev/console
+	sync
+	/usr/bin/upgrate > /dev/console 2>&1	
+elif [ "$SEEN" -gt 3 ]
+then
+	#echo "REBOOT" > /dev/console
+	sync
+	reboot
+
+fi
+
+return 0

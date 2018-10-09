@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include "tty_com.h"
 
 int dhtFd;
 
@@ -57,10 +58,12 @@ void * dht11_loop()
 
 		temp = dht11>>8;
 		humi = dht11 &0x000000ff;
-		printf("the current temperature is: %d\n",temp);
-		printf("the current humidity is:    %d\n",humi);
+		printf("\nthe current temperature is: \n %d\n",temp);
+		printf("the current humidity is:    \n %d\n",humi);
 
-		sleep(100);
+		//sleep(100);
+		sleep(3);
+
 	}
 	close(fd);
 	

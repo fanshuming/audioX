@@ -1,0 +1,88 @@
+#ifndef __TTY_COM_H__
+#define __TTY_COM_H__
+
+/*
+char head_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x00};
+char head_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x01};
+char foot_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x02};
+char foot_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x03};
+char leg_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x04};
+char leg_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x05};
+char lumbar_up_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x06};
+char lumbar_down_buf[6]={0x5A,0x10,0x10,0x02,0x40,0x07};
+char stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x0F};
+char flat_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x10};
+char antisnore_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x16};
+char lounge_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x17};
+char zero_gravity_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x13};
+char incline_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x18};
+char lounge_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x27};
+char zero_gravity_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x23};
+char incline_program_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x28};
+char massage_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x51};
+char wave_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x52};
+char wave_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x53};
+char wave_three_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x54};
+char wave_four_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x55};
+char full_body_one_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x56};
+char full_body_two_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x57};
+char massage_up_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x60};
+char massage_down_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x61};
+char massage_stop_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x6F};
+char light_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char lights_on_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x73};
+char light_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+char lights_off_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x74};
+char toggle_light_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x70};
+char toggle_lights_buf[6]={0x5A,0x10,0x10,0x02,0x30,0x70};
+char feedback_off_buf[6]={"None"};
+char feedback_on_buf[6]={"None"};
+
+char send_cmd_to_com[20]={};
+
+*/
+
+extern char send_cmd_to_com[20];
+extern int ttyfd;
+
+/*******************************************************************
+* ¹¦ÄÜ£º            ÉèÖÃ´®¿ÚÊı¾İÎ»£¬Í£Ö¹Î»ºÍĞ§ÑéÎ»
+* Èë¿Ú²ÎÊı£º        fd         ´®¿ÚÎÄ¼şÃèÊö·û
+*                   speed      ´®¿ÚËÙ¶È
+*                   flow_ctrl  Êı¾İÁ÷¿ØÖÆ
+*                   databits   Êı¾İÎ»   È¡ÖµÎª 7 »òÕß8
+*                   stopbits   Í£Ö¹Î»   È¡ÖµÎª 1 »òÕß2
+*                   parity     Ğ§ÑéÀàĞÍ È¡ÖµÎªN,E,O,,S
+*³ö¿Ú²ÎÊı£º         ÕıÈ··µ»ØÎª1£¬´íÎó·µ»ØÎª0
+*******************************************************************/
+int UARTx_Set(int fd, int speed, int flow_ctrl, int databits, int stopbits, int parity);
+
+/*******************************************************************
+* Ãû³Æ£º           UART0_Recv
+* ¹¦ÄÜ£º           ½ÓÊÕ´®¿ÚÊı¾İ
+* Èë¿Ú²ÎÊı£º       fd          :ÎÄ¼şÃèÊö·û    
+*                  rcv_buf     :½ÓÊÕ´®¿ÚÖĞÊı¾İ´æÈërcv_buf»º³åÇøä¸??*                  data_len    :Ò»Ö¡Êı¾İµÄ³¤¶È
+* ³ö¿Ú²ÎÊı£º       ÕıÈ··µ»ØÎª1£¬´íÎó·µ»ØÎª0
+*******************************************************************/
+int UARTx_Recv(int fd, char *rcv_buf,int data_len);
+
+/*******************************************************************
+* Ãû³Æ£º            UART0_Send
+* ¹¦ÄÜ£º            ·¢ËÍÊı¾İ
+* Èë¿Ú²ÎÊı£º         fd         :ÎÄ¼şÃèÊö·û    
+*                   send_buf    :å??·Å´®¿Ú·¢ËÍÊı¾İ
+*                   data_len    :Ò»Ö¡Êı¾İµÄ¸öæ??
+* ³ö¿Ú²ÎÊı£º        ÕıÈ··µ»ØÎª1£¬´íÎó·µ»ØÎª0
+*******************************************************************/
+int UARTx_Send(int fd, char *send_buf,int data_len);
+
+
+/*****************************************************************
+* ¹¦ÄÜ£º         ´ò¿ª´®¿Ú²¢·µ»Ø´®¿ÚÉè±¸ÎÄ¼şÃèÊö
+* Èë¿Ú²ÎÊı£º     fd:ÎÄ¼şÃèÊö·û   port:´®¿ÚºÅ(ttyS0,ttyS1,ttyS2)
+* ³ö¿Ú²ÎÊı£º     ÕıÈ··µ»ØÎª1ï¼????Îó·µ»ØÎª0
+*****************************************************************/
+int UARTx_Open(int fd, const char * ttyX);
+
+void * send_data_to_com_thread(void *);
+#endif
