@@ -495,6 +495,15 @@ main(int argc, char *argv[])
 //    sem_init(&sem_mic_wakeup, 0, 0);
 
     led_off();
+    sleep(1);
+    led_on();
+
+    sleep(1);
+    led_off();
+    sleep(1);
+    led_on();
+    sleep(1);
+    led_off();
 
     ttyfd = UARTx_Open(ttyfd, "/dev/ttyS0");
 
@@ -550,16 +559,24 @@ main(int argc, char *argv[])
    printf("\n#####################################################\n");
    printf("\n#######################System boot done!#############\n"); 
    printf("\n#####################################################\n");
+/*
+   if(net_check())
+   {
+	pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
+   }
+*/
+
 
    for(;;){
 		
-		if(system("ping -c 1 -w 2 120.27.138.117") == 0){
+		if(system("ping -c 1 -w 2 dongle.topqizhi.com") == 0){
     			pthread_create(&mosq_pid, NULL, mosq_loop, NULL);
 			break;
 		}else{
 			sleep(5);
 		}
 	}
+
 
 //    pthread_join(record_pid, NULL);
    // pthread_join(send_data_to_com_thread_pid, NULL);

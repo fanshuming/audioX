@@ -391,6 +391,8 @@ void send_data_to_com( int fd)
                         UARTx_Send(fd, incline_program_buf, 6);
                 }else if(!strcmp(send_cmd_to_com, "massage on")){
                         UARTx_Send(fd, massage_on_buf, 6);
+                }else if(!strcmp(send_cmd_to_com, "massage start")){
+                        UARTx_Send(fd, massage_on_buf, 6);
                 }else if(!strcmp(send_cmd_to_com, "massage up")){
                         UARTx_Send(fd, massage_up_buf, 6);
                 }else if(!strcmp(send_cmd_to_com, "massage down")){

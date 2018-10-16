@@ -30,6 +30,10 @@ Contributors:
 
 #include <mosquitto.h>
 #include "client_shared.h"
+#include "getMac.h"
+
+//char mac_addr[32];
+char  szMac[18];
 
 static int mosquitto__parse_socks_url(struct mosq_config *cfg, char *url);
 static int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, char *argv[]);
@@ -540,6 +544,16 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 					cfg->topic_count++;
 					cfg->topics = realloc(cfg->topics, cfg->topic_count*sizeof(char *));
 					cfg->topics[cfg->topic_count-1] = strdup(argv[i+1]);
+					printf("#######topic: %s ############\n",cfg->topics[cfg->topic_count-1]);
+					//add for mac
+					//get_mac_addr(mac_addr);
+					int   nRtn = get_mac(szMac, sizeof(szMac));
+					printf("\n################ mac addr: %s #####################\n",szMac);
+					if(!(strcmp(cfg->topics[cfg->topic_count-1], "product_info")))
+					{
+						cfg->topics[cfg->topic_count-1] = szMac;
+					}
+					
 				}
 				i++;
 			}

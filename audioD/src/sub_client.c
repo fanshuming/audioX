@@ -237,7 +237,7 @@ void * mosq_loop()
                 "-t",
                 "umomoSofa",
                 "-h",
-                "120.27.138.117",
+                "dongle.topqizhi.com",
 		"-u",
 		"iot",
 		"-P",

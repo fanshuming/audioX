@@ -7,8 +7,8 @@
 #include <sys/ioctl.h>
 
 
-#define LED_ON 	0 //0 home//1 custom
-#define LED_OFF 1
+#define LED_ON 	1 //0 home//1 custom
+#define LED_OFF 0
 
 int ledFd;
 static int led_status = 0;

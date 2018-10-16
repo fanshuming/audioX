@@ -107,7 +107,8 @@ int get_version()
     /* First set the URL that is about to receive our POST. This URL can
        just as well be a https:// URL if that is what should receive the
        data. */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://120.27.138.117:9096/dongle/device/version");
+    //curl_easy_setopt(curl, CURLOPT_URL, "http://120.27.138.117:9096/dongle/device/version");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://dongle.topqizhi.com:9096/dongle/device/version");
     /* Now specify the POST data */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData);
 
