@@ -66,7 +66,7 @@ int get_version()
 
   static const char *pagefilename = "/tmp/version.json";
   char * current_version;
-  char postData[80] = "dongle_version=";
+  char postData[80] = "version=";
   char postData1[80] = "";
   char postData2[80] = "";
   
@@ -82,8 +82,9 @@ int get_version()
   len = strlen(current_version);
   printf("version len :%d\n", len);
 
-  strncpy(postData+15, current_version, len-1);
+  strncpy(postData+8, current_version, len-1);
 
+/*
   memcpy(postData1, postData, strlen(postData));
   strncpy(postData1+23,"&mac=", 5);
 
@@ -94,8 +95,9 @@ int get_version()
   //strncpy(postData2+28, "1C:88:79:51:EF:D0", 17); 
   strncpy(postData2+28, szMac, strlen(szMac)); 
 
-  printf("========postData:%s=======\n", postData2);
-
+  printf("========postData:%s=======\n", postData);
+*/
+  printf("========postData:%s=======\n", postData);
   FILE * pagefile;
 
   /* In windows, this will init the winsock stuff */
@@ -108,7 +110,7 @@ int get_version()
        just as well be a https:// URL if that is what should receive the
        data. */
     //curl_easy_setopt(curl, CURLOPT_URL, "http://120.27.138.117:9096/dongle/device/version");
-    curl_easy_setopt(curl, CURLOPT_URL, "http://dongle.topqizhi.com:9096/dongle/device/version");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://alexa.topqizhi.com/setting/update");
     /* Now specify the POST data */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData);
 

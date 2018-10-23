@@ -88,7 +88,7 @@ void main()
 
                         system("sysupgrade  /tmp/upgrade.bin");
                 }else{
-			sleep(3);
+			sleep(5);
 			led_off();
                         LOGD("current version is the latest.\n");
                 }

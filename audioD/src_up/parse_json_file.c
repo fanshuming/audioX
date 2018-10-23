@@ -18,7 +18,7 @@ void save_version(char * url)
 
 	while(token != NULL)
 	{
-		printf("%s\n", token);
+		printf("======================%s\n", token);
 		fwrite(token, 1, strlen(token), incaptureFp);
 		break;	//token=strtok(NULL, ",");
         }
@@ -61,7 +61,7 @@ char * parse_json(const char *filename)
     {
         char *message = cJSON_Print(message_json);    //将JSON结构体打印到字符串中 需要自己释放
         printf("message:%s\n", message);
-        free(message);
+        //free(message);
     }
 
     cJSON *data_json = cJSON_GetObjectItem(root_json, "data");
@@ -76,10 +76,10 @@ char * parse_json(const char *filename)
         	free(data);
         	printf("url:%s\n",url);
 		save_version(url);
-
         	return url;
 
         }else{
+		cJSON_Delete(data_json);
 		return NULL;
 	}
     }
