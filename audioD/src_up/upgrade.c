@@ -73,7 +73,7 @@ void main()
         if((access("/tmp/version.json", F_OK)) != -1)
         {
                 binUrl = (char *) parse_json("/tmp/version.json");
-                if(binUrl != NULL)
+                if(NULL != binUrl)
                 {
 
 			pthread_create(&alarm_handle_upgrade_id, NULL, alarm_handle_upgrade, NULL);
@@ -91,17 +91,20 @@ void main()
 			sleep(5);
 			led_off();
                         LOGD("current version is the latest.\n");
+			return;
                 }
         }else{  
 		sleep(3);
                 led_off();
                 LOGD("the file /tmp/version.json don't exist!\n");
+		return;
          }
 
     }else{
 	//sleep(2);
 	led_off();
         LOGD("Don't check the version, net is not connected!\n");
+	return;
     }
 	pthread_join(alarm_handle_upgrade_id, NULL);
 }

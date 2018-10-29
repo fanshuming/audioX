@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "cJSON.h"  //需要把该头文件放在后面包含  否则会找不到size_t
 
-char  url[100] = "https://";
+char  url[100]="https://";
 
 void save_version(char * url)
 {
@@ -61,28 +61,41 @@ char * parse_json(const char *filename)
     {
         char *message = cJSON_Print(message_json);    //将JSON结构体打印到字符串中 需要自己释放
         printf("message:%s\n", message);
-        //free(message);
+        free(message);
     }
 
     cJSON *data_json = cJSON_GetObjectItem(root_json, "data");
     if (data_json != NULL)
     {
         char *data = cJSON_Print(data_json);    //将JSON结构体打印到字符串中 需要自己释放
+	printf("the date is:%s\n",data);
         if(strcmp(data, "null"))
 	{
         	printf("data:%s\n", data);
-        
-        	strncpy(url+8, data+1, strlen(data)-2);
+
+		
+       		if (strstr(data, "http") != NULL)
+		{
+			strncpy(url, data+1, strlen(data)-2);
+		}else{
+        		strncpy(url+8, data+1, strlen(data)-2);
+		}
+		
         	free(data);
         	printf("url:%s\n",url);
 		save_version(url);
+		//cJSON_Delete(data_json);
         	return url;
 
         }else{
-		cJSON_Delete(data_json);
+		
+		//cJSON_Delete(data_json);
 		return NULL;
 	}
     }
+
+    //cJSON_Delete(root_json);
+
     //"data":"..."
     //id
     //username
